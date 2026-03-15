@@ -1,0 +1,189 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--navbar-height);
+  background: rgba(var(--color-bg-rgb, 247 245 240 / 1), 0.9);
+  background-color: var(--color-bg);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--transition-base);
+}
+
+.inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+/* --- Logo --- */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.logoIcon {
+  font-size: 1.4rem;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.logoText {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.logoAccent { color: var(--color-accent); }
+
+/* --- Nav --- */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-2);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+}
+.navLink:hover { color: var(--color-text); background: var(--color-bg-2); }
+.navLinkActive { color: var(--color-text); background: var(--color-bg-2); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+}
+
+/* --- Busca --- */
+.searchForm {
+  flex: 1;
+  max-width: 340px;
+  display: flex;
+  align-items: center;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.searchForm:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.12);
+}
+
+.searchInput {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  outline: none;
+  min-width: 0;
+}
+.searchInput::placeholder { color: var(--color-text-3); }
+
+.searchBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-2);
+  transition: color var(--transition-fast);
+}
+.searchBtn:hover { color: var(--color-accent); }
+
+/* --- Ações --- */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.iconBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-2);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.iconBtn:hover {
+  color: var(--color-text);
+  background: var(--color-bg-2);
+}
+
+.cartBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menuBtn { display: none; }
+
+/* --- Mobile menu --- */
+.mobileMenu {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--color-bg);
+}
+
+.mobileLink {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-2);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.mobileLink:hover { color: var(--color-text); background: var(--color-bg-2); }
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .nav, .searchForm { display: none; }
+  .menuBtn { display: flex; }
+  .header  { height: auto; }
+  .inner   { height: var(--navbar-height); }
+}

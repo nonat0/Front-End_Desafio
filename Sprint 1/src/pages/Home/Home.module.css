@@ -1,0 +1,33 @@
+.main { padding: var(--space-8) 0 var(--space-16); }
+
+.hero { margin-bottom: var(--space-10); }
+
+/* Cabeçalho com título e contagem */
+.shopHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.shopTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+}
+
+.shopCount {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+
+/* Seção de produtos — filtros em cima, grid em baixo ocupando 100% */
+.shopSection {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

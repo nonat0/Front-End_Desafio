@@ -1,0 +1,335 @@
+.main { padding: var(--space-8) 0 var(--space-16); }
+
+/* ─── Cabeçalho ─── */
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+.pageTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: 800;
+  margin-bottom: var(--space-1);
+}
+.pageDesc {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+.clearBtn {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  white-space: nowrap;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+.clearBtn:hover { color: var(--color-error); border-color: var(--color-error); }
+
+/* ─── Painel de configuração ─── */
+.configPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+/* Seleção dots */
+.selectionInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.selectionDots {
+  display: flex;
+  gap: var(--space-2);
+}
+.selectionDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: background var(--transition-base), transform var(--transition-base);
+}
+.selectionDotActive {
+  background: var(--color-promo);
+  transform: scale(1.2);
+}
+.selectionText {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+
+/* Campo de desconto */
+.discountControl {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+.discountLabel {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+.discountInputWrapper {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.discountInput {
+  width: 64px;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-accent);
+  outline: none;
+  text-align: center;
+}
+.discountSymbol {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-accent);
+  padding-right: var(--space-3);
+}
+.discountHint {
+  font-size: var(--text-xs);
+  color: var(--color-promo);
+  font-weight: 500;
+}
+
+/* ─── Filtros ─── */
+.filters {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 200px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.searchInput:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.12);
+}
+.searchInput::placeholder { color: var(--color-text-3); }
+
+.categorySelect {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+.categorySelect:focus { border-color: var(--color-accent); }
+
+/* ─── Grid ─── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.loadingWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+}
+.empty {
+  min-height: 30vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  font-size: var(--text-lg);
+  color: var(--color-text-2);
+}
+
+/* ─── Card de promoção ─── */
+.promoCard {
+  position: relative;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+  display: flex;
+  flex-direction: column;
+}
+.promoCard:hover {
+  border-color: var(--color-border-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Borda verde quando selecionado */
+.promoCardSelected {
+  border-color: var(--color-promo-border) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15), var(--shadow-md) !important;
+  transform: translateY(-3px);
+}
+
+/* Ícone de check */
+.checkIcon {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-border);
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base);
+}
+.checkVisible {
+  background: var(--color-promo) !important;
+  border-color: var(--color-promo) !important;
+  color: #fff !important;
+}
+
+.cardImage {
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--color-bg-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  overflow: hidden;
+}
+.cardImage img {
+  max-width: 100%;
+  max-height: 130px;
+  object-fit: contain;
+  transition: transform var(--transition-slow);
+}
+.promoCard:hover .cardImage img { transform: scale(1.05); }
+
+.cardInfo {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.cardCategory {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-accent);
+}
+
+.cardTitle {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.cardPriceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.cardOriginalPrice {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+  text-decoration: line-through;
+}
+
+.cardPrice {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.cardPricePromo { color: var(--color-promo); }
+
+.cardDiscountBadge {
+  background: var(--color-promo-light);
+  color: var(--color-promo);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+}
+
+/* ─── Modal ─── */
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+.modalIcon { font-size: 2.5rem; }
+.modalText {
+  font-size: var(--text-base);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+.modalHint {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+.modalCloseBtn {
+  padding: var(--space-3) var(--space-8);
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-weight: 700;
+  transition: background var(--transition-fast);
+}
+.modalCloseBtn:hover { background: var(--color-accent-hover); }

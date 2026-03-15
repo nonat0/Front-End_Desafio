@@ -1,0 +1,75 @@
+/* Barra horizontal de filtros — ocupa 100% da largura acima do grid */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+/* Grupo de pills de categoria com scroll horizontal no mobile */
+.categories {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+/* Botão pill de categoria */
+.pill {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-2);
+  background: transparent;
+  white-space: nowrap;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.pill:hover {
+  color: var(--color-text);
+  border-color: var(--color-border-hover);
+  background: var(--color-bg-2);
+}
+
+/* Pill ativo — destaque com cor de acento */
+.pillActive {
+  background: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* Select de ordenação alinhado à direita */
+.select {
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-bg-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color var(--transition-fast);
+}
+.select:focus {
+  border-color: var(--color-accent);
+}
+
+@media (max-width: 600px) {
+  .bar { gap: var(--space-3); }
+  .select { width: 100%; }
+}
