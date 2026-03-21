@@ -16,7 +16,7 @@ import styles from './ProductCard.module.css'
 export function ProductCard({ product }) {
   const { addToCart, isInCart } = useCartContext()
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlistContext()
-  const { getEffectivePrice, isPromoted, discount } = usePromotionsContext()
+  const { getEffectivePrice, isPromoted, getItemDiscount } = usePromotionsContext()
   const { showToast } = useToastContext()
 
   /* Controla animação de feedback no botão do carrinho */
@@ -26,6 +26,7 @@ export function ProductCard({ product }) {
   const inCart      = isInCart(product.id)
   const inWatchlist = isInWatchlist(product.id)
   const promoted    = isPromoted(product.id)
+  const itemDiscount   = getItemDiscount(product.id)
   const effectivePrice = getEffectivePrice(product)
 
   const handleAddToCart = (e) => {
@@ -54,7 +55,7 @@ export function ProductCard({ product }) {
     <Link to={`/product/${product.id}`} className={styles.card}>
       {/* Badge de promoção */}
       {promoted && (
-        <div className={styles.promoBadge}>-{discount}%</div>
+        <div className={styles.promoBadge}>-{itemDiscount}%</div>
       )}
 
       {/* Imagem */}

@@ -5,11 +5,11 @@
 // Expansível para adicionar menu de usuário autenticado, notificações, etc.
 
 import { useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useCartContext } from '@/context/CartContext'
 import { useWatchlistContext } from '@/context/WatchlistContext'
 import { useThemeContext } from '@/context/ThemeContext'
-import { useDebounce } from '@/hooks/useDebounce'
+import { useSearchContext } from '@/context/SearchContext'
 import { CartDrawer } from '@/components/cart/CartDrawer/CartDrawer'
 import styles from './Navbar.module.css'
 
@@ -17,20 +17,22 @@ export function Navbar() {
   const { itemCount } = useCartContext()
   const { itemCount: watchCount } = useWatchlistContext()
   const { isDark, toggleTheme } = useThemeContext()
-  const navigate = useNavigate()
+  const { searchQuery, setSearchQuery } = useSearchContext()
+  const location = useLocation()
 
   const [cartOpen, setCartOpen] = useState(false)
-  const [searchValue, setSearchValue] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const debouncedSearch = useDebounce(searchValue, 350)
+  // Só exibe a barra de busca na página inicial
+  const isHome = location.pathname === '/'
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value)
+  }
+
+  // Impede submit padrão — a busca já é reativa ao onChange
   const handleSearchSubmit = (e) => {
     e.preventDefault()
-    if (debouncedSearch.trim()) {
-      navigate(`/?search=${encodeURIComponent(debouncedSearch.trim())}`)
-      setSearchValue('')
-    }
   }
 
   return (
@@ -57,22 +59,24 @@ export function Navbar() {
             </NavLink>
           </nav>
 
-          {/* Busca */}
-          <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
-            <input
-              type="search"
-              placeholder="Buscar produtos…"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              className={styles.searchInput}
-              aria-label="Buscar produtos"
-            />
-            <button type="submit" className={styles.searchBtn} aria-label="Pesquisar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-              </svg>
-            </button>
-          </form>
+          {/* Busca — só aparece na Home */}
+          {isHome && (
+            <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
+              <input
+                type="search"
+                placeholder="Buscar produtos…"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className={styles.searchInput}
+                aria-label="Buscar produtos"
+              />
+              <button type="submit" className={styles.searchBtn} aria-label="Pesquisar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+              </button>
+            </form>
+          )}
 
           {/* Ações */}
           <div className={styles.actions}>

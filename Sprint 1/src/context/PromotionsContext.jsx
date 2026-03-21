@@ -1,10 +1,6 @@
 // PromotionsContext — núcleo do sistema de promoções.
-// Responsável por:
-//   - Manter lista de produtos em promoção (máx. MAX_PROMO_ITEMS)
-//   - Armazenar o percentual de desconto global
-//   - Expor `getEffectivePrice(product)` que todos os componentes usam
-//     para obter o preço correto (original ou promocional)
-//   - Persistir estado no localStorage para sobreviver a refreshes
+// Cada item promovido carrega seu próprio percentual de desconto individual.
+// getEffectivePrice() lê o desconto do próprio item, não mais um valor global.
 
 import {
   createContext,
@@ -20,30 +16,33 @@ import { getItem, setItem } from '@/services/storage/localStorage'
 const PromotionsContext = createContext(null)
 
 const initialState = {
-  /* Array de produtos completos selecionados para promoção */
-  promotedItems: getItem(STORAGE_KEYS.PROMOTIONS, {
-    items: [],
-    discount: 10,
-  }).items,
-  /* Percentual de desconto aplicado a todos os itens promovidos */
-  discount: getItem(STORAGE_KEYS.PROMOTIONS, { items: [], discount: 10 }).discount,
+  // Cada item carrega { ...produto, discount: number } — desconto individual
+  promotedItems: getItem(STORAGE_KEYS.PROMOTIONS, { items: [] }).items,
 }
 
 function promotionsReducer(state, action) {
   switch (action.type) {
     case 'ADD_ITEM': {
-      /* Impede duplicatas e respeita o limite máximo */
       if (state.promotedItems.length >= MAX_PROMO_ITEMS) return state
       if (state.promotedItems.find((p) => p.id === action.payload.id)) return state
-      return { ...state, promotedItems: [...state.promotedItems, action.payload] }
+      // Adiciona o item com discount: 10 como valor padrão inicial
+      return { ...state, promotedItems: [...state.promotedItems, { ...action.payload, discount: 10 }] }
     }
     case 'REMOVE_ITEM':
       return {
         ...state,
         promotedItems: state.promotedItems.filter((p) => p.id !== action.payload),
       }
-    case 'SET_DISCOUNT':
-      return { ...state, discount: action.payload }
+    // Define o desconto de um item específico pelo ID
+    case 'SET_ITEM_DISCOUNT':
+      return {
+        ...state,
+        promotedItems: state.promotedItems.map((p) =>
+          p.id === action.payload.id
+            ? { ...p, discount: action.payload.discount }
+            : p
+        ),
+      }
     case 'CLEAR':
       return { ...state, promotedItems: [] }
     default:
@@ -54,40 +53,27 @@ function promotionsReducer(state, action) {
 export function PromotionsProvider({ children }) {
   const [state, dispatch] = useReducer(promotionsReducer, initialState)
 
-  /* Persiste automaticamente no localStorage sempre que o estado muda */
+  // Persiste automaticamente — cada item já carrega seu próprio discount
   useEffect(() => {
-    setItem(STORAGE_KEYS.PROMOTIONS, {
-      items: state.promotedItems,
-      discount: state.discount,
-    })
+    setItem(STORAGE_KEYS.PROMOTIONS, { items: state.promotedItems })
   }, [state])
 
-  /**
-   * Verifica se um produto está na lista de promoções.
-   * @param {number} productId
-   * @returns {boolean}
-   */
   const isPromoted = useCallback(
     (productId) => state.promotedItems.some((p) => p.id === productId),
     [state.promotedItems]
   )
 
-  /**
-   * Retorna o preço efetivo de um produto:
-   * se estiver em promoção, aplica o desconto; caso contrário, retorna o original.
-   * Este é o método central que deve ser chamado em TODOS os lugares que exibem preço.
-   * @param {Product} product
-   * @returns {number}
-   */
+  // Retorna o preço efetivo usando o desconto individual do próprio item
   const getEffectivePrice = useCallback(
     (product) => {
       if (!product) return 0
-      if (isPromoted(product.id)) {
-        return applyDiscount(product.price, state.discount)
+      const promoItem = state.promotedItems.find((p) => p.id === product.id)
+      if (promoItem) {
+        return applyDiscount(product.price, promoItem.discount)
       }
       return product.price
     },
-    [isPromoted, state.discount]
+    [state.promotedItems]
   )
 
   const addPromoItem = useCallback((product) => {
@@ -98,9 +84,19 @@ export function PromotionsProvider({ children }) {
     dispatch({ type: 'REMOVE_ITEM', payload: productId })
   }, [])
 
-  const setDiscount = useCallback((value) => {
-    dispatch({ type: 'SET_DISCOUNT', payload: Number(value) })
+  // Define o desconto de um item específico (substitui o antigo setDiscount global)
+  const setItemDiscount = useCallback((productId, value) => {
+    dispatch({ type: 'SET_ITEM_DISCOUNT', payload: { id: productId, discount: Number(value) } })
   }, [])
+
+  // Retorna o discount atual de um item específico (usado nos inputs da página)
+  const getItemDiscount = useCallback(
+    (productId) => {
+      const item = state.promotedItems.find((p) => p.id === productId)
+      return item ? item.discount : 10
+    },
+    [state.promotedItems]
+  )
 
   const clearPromos = useCallback(() => {
     dispatch({ type: 'CLEAR' })
@@ -110,12 +106,12 @@ export function PromotionsProvider({ children }) {
     <PromotionsContext.Provider
       value={{
         promotedItems: state.promotedItems,
-        discount: state.discount,
         isPromoted,
         getEffectivePrice,
+        getItemDiscount,
         addPromoItem,
         removePromoItem,
-        setDiscount,
+        setItemDiscount,
         clearPromos,
       }}
     >

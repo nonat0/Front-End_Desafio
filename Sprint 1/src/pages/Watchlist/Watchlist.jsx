@@ -15,11 +15,12 @@ import styles from './Watchlist.module.css'
 function WatchlistCard({ product }) {
   const { removeFromWatchlist } = useWatchlistContext()
   const { addToCart, isInCart } = useCartContext()
-  const { getEffectivePrice, isPromoted, discount } = usePromotionsContext()
+  const { getEffectivePrice, isPromoted, getItemDiscount } = usePromotionsContext()
   const { showToast } = useToastContext()
 
-  const inCart      = isInCart(product.id)
-  const promoted    = isPromoted(product.id)
+  const inCart         = isInCart(product.id)
+  const promoted       = isPromoted(product.id)
+  const itemDiscount   = getItemDiscount(product.id)
   const effectivePrice = getEffectivePrice(product)
 
   const handleAddToCart = () => {
@@ -35,7 +36,7 @@ function WatchlistCard({ product }) {
   return (
     <div className={styles.card}>
       {/* Badge promoção */}
-      {promoted && <div className={styles.promoBadge}>-{discount}%</div>}
+      {promoted && <div className={styles.promoBadge}>-{itemDiscount}%</div>}
 
       {/* Botão remover */}
       <button

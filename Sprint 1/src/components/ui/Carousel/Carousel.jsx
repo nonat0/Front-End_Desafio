@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import styles from './Carousel.module.css'
 
 export function Carousel() {
-  const { promotedItems, discount } = usePromotionsContext()
+  const { promotedItems } = usePromotionsContext()
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -22,7 +22,7 @@ export function Carousel() {
     ? promotedItems.map((p) => ({
         id: p.id,
         title: p.title,
-        description: `${discount}% de desconto • De ${formatPrice(p.price)} por ${formatPrice(applyDiscount(p.price, discount))}`,
+        description: `${p.discount}% de desconto • De ${formatPrice(p.price)} por ${formatPrice(applyDiscount(p.price, p.discount))}`,
         image: p.image,
         productId: p.id,
       }))
@@ -55,8 +55,7 @@ export function Carousel() {
       onMouseLeave={() => setPaused(false)}
     >
       {/* Imagem de fundo com overlay */}
-      <div>
-        <div className={styles.bg}>
+      <div className={styles.bg}>
         <img
           key={slide.id}
           src={slide.image}
@@ -65,26 +64,24 @@ export function Carousel() {
           onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&q=80' }}
         />
         <div className={styles.overlay} />
-        </div>
-
-        {/* Conteúdo do slide */}
-        <div className={styles.content}>
-          {promotedItems.length > 0 && (
-            <span className={styles.promoBadge}>🔥 Promoção</span>
-          )}
-          <h1 className={styles.title}>{slide.title}</h1>
-          <p className={styles.description}>{slide.description}</p>
-          {slide.productId && (
-            <button
-              className={styles.cta}
-              onClick={() => navigate(`/product/${slide.productId}`)}
-            >
-              Ver produto
-            </button>
-          )}
-        </div>
       </div>
-      
+
+      {/* Conteúdo do slide */}
+      <div className={styles.content}>
+        {promotedItems.length > 0 && (
+          <span className={styles.promoBadge}>🔥 Promoção</span>
+        )}
+        <h1 className={styles.title}>{slide.title}</h1>
+        <p className={styles.description}>{slide.description}</p>
+        {slide.productId && (
+          <button
+            className={styles.cta}
+            onClick={() => navigate(`/product/${slide.productId}`)}
+          >
+            Ver produto
+          </button>
+        )}
+      </div>
 
       {/* Controles de navegação */}
       {slides.length > 1 && (

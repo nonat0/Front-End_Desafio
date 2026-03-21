@@ -1,15 +1,10 @@
-# Dev Store
+# ◈ Desenvolve Store
 
-Aplicação de e-commerce utilizando React + Vite com consumo da [Fake Store API](https://fakestoreapi.com).
-Com objetivo de desenvolver fundamentos imprescindíveis do Front-end tais como:
+Aplicação de e-commerce seguindo a trilha Front-End do **Projeto Desenvolve**, utilizando React + Vite com consumo da [Fake Store API](https://fakestoreapi.com).
 
-Consumo de API & Hooks;
-Funcionalidades do Carrinho;
-Organização e Componentização;
-UX/Interface & Entrega;
 ---
 
-##  Como rodar localmente
+## Como rodar localmente
 
 ```bash
 # 1. Instalar dependências
@@ -24,7 +19,7 @@ http://localhost:5173
 
 ---
 
-## </> Estrutura do projeto
+## Estrutura do projeto
 
 ```
 src/
@@ -44,7 +39,7 @@ src/
 
 ---
 
-##  Funcionalidades implementadas
+## Funcionalidades implementadas
 
 ### Loja
 - Grid responsivo de produtos com cards componentizados
@@ -75,67 +70,58 @@ src/
 - Badge de contagem na Navbar
 
 ### Promoções
-- Aba dedicada com grid de todos os produtos;
-- Filtro por nome (busca com debounce) e categoria;
-- Seleção visual com **borda verde** nos itens escolhidos;
-- Limite de **3 produtos simultâneos apenas para apresentação da funcionalidade** com **modal de erro** na tela;
-- Campo de **% de desconto** aplicado globalmente ao selecionar uma promoção;
-- Preços promocionais refletidos em toda a loja (ProductCard, ProductDetail, CartDrawer);
-- Carousel hero na Home alimentado pelos produtos em promoção;
-- Fallback com 3 banners padrão quando sem promoções ativas;
+- Aba dedicada com grid de todos os produtos
+- Filtro por nome (busca com debounce) e categoria
+- Seleção visual com **borda verde** nos itens escolhidos
+- Limite de **3 produtos simultâneos** com **modal de erro** na tela
+- Campo de **% de desconto** aplicado globalmente
+- Preços promocionais refletidos em toda a loja (ProductCard, ProductDetail, CartDrawer)
+- Carousel hero na Home alimentado pelos produtos em promoção
+- Fallback com 3 banners padrão quando sem promoções ativas
 
 ### UX & Qualidade
-- **Dark mode** toggle com persistência no localStorage;
-- **Toasts** feedbacks visuais ao realizar ações como adicionar ao carrinho e à watchlist;
-- **Modal** de erro ao tentar selecionar mais de 3 promoções;
-- Micro-animações nos botões (efeito pop no clique);
-- Carousel com auto-play, pause no hover e controles de navegação;
-- Scrollbar customizada;
-- Layout totalmente responsivo;
-- Focus ring acessível na seção de gerenciamento de promoções;
+- **Dark mode** toggle com persistência no localStorage
+- **Toasts** de feedback ao adicionar ao carrinho e à watchlist
+- **Modal** de erro ao tentar selecionar mais de 3 promoções
+- Micro-animações nos botões (efeito pop no clique)
+- Carousel com auto-play, pause no hover e controles de navegação
+- Scrollbar customizada
+- Layout totalmente responsivo (mobile-first)
+- Focus ring acessível
+
 ---
 
 ## Stack tecnológica
 
-| Tecnologia               | Uso                            |
-|--------------------------|--------------------------------|
-| React 18                 | Framework UI                   |
-| Vite                     | Bundler e dev server           |
-| React Router v6          | Roteamento SPA                 |
-| Axios                    | Cliente HTTP com interceptors  |
-| Context API + useReducer | Estado global                  |
-| CSS Modules              | Estilização com escopo isolado |
-| localStorage             | Persistência de estado         |
-| Fake Store API           | Dados de produtos              |
+| Tecnologia | Uso |
+|---|---|
+| React 18 | Framework UI |
+| Vite | Bundler e dev server |
+| React Router v6 | Roteamento SPA |
+| Axios | Cliente HTTP com interceptors |
+| Context API + useReducer | Estado global |
+| CSS Modules | Estilização com escopo isolado |
+| localStorage | Persistência de estado |
+| Fake Store API | Dados de produtos |
 
- **Fontes:**
-  <!-- ainda em testes -->
+**Fontes:** Syne (display) + DM Sans (corpo)
+
+---
+
+## Critérios do Projeto
+
+| Critério | Implementação |
+|---|---|
+| Consumo de API & Hooks | useProducts, useProductDetail, useDebounce, cache em memória |
+| Funcionalidades do Carrinho | Drawer completo, quantidades, total em tempo real, localStorage |
+| Organização e Componentização | Arquitetura em camadas, contextos separados, hooks customizados |
+| UX/Interface & Entrega | Loading states, toasts, modal, animações, dark mode, responsivo |
 
 ---
 
 ##  Extras implementados
 
--  Busca com debounce
--  Dark mode toggle
--  Animações de transição de página *(expansível com React Transition Group)*
+- Busca com debounce
+- Dark mode toggle
 
 ---
-
-##  Critérios de avaliação que já foram desenvolvidos
-
-- Consumo de API & Hooks ------------> ✅ useProducts, useProductDetail, useDebounce, cache em memória 
-- Funcionalidades do Carrinho -------> ✅ Drawer completo, quantidades, total em tempo real, localStorage 
-- Organização e Componentização -----> ✅ Arquitetura em camadas, contextos separados, hooks customizados 
-- UX/Interface & Entrega ------------> ✅ Loading states, toasts, modal, animações, dark mode, responsivo 
-
----
-
-## O que será implementado nas próximas seções *(sujeito a mudança de planos)*
-
-- **Checkout** — página de pagamento com formulário e integração de gateway
-- **Autenticação** — login/cadastro e perfil de usuário
-- **Rating por usuário** — avaliações com estrelas e comentários
-- **Comentários** — sistema de reviews por produto
-- **Notificações de preço** — alertas quando produto na watchlist entra em promoção
-- **Paginação/Scroll infinito** — para grandes catálogos
-- **Painel admin** — gerenciamento de produtos e promoções com 

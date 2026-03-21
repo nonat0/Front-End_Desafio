@@ -8,6 +8,7 @@ import { ToastProvider } from './ToastContext'
 import { PromotionsProvider } from './PromotionsContext'
 import { CartProvider } from './CartContext'
 import { WatchlistProvider } from './WatchlistContext'
+import { SearchProvider } from './SearchContext'
 
 export function AppProviders({ children }) {
   return (
@@ -16,7 +17,9 @@ export function AppProviders({ children }) {
         <PromotionsProvider>
           <CartProvider>
             <WatchlistProvider>
-              {children}
+              <SearchProvider>
+                {children}
+              </SearchProvider>
             </WatchlistProvider>
           </CartProvider>
         </PromotionsProvider>

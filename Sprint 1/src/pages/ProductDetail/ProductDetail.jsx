@@ -22,7 +22,7 @@ export function ProductDetail() {
 
   const { addToCart, isInCart } = useCartContext()
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlistContext()
-  const { getEffectivePrice, isPromoted, discount } = usePromotionsContext()
+  const { getEffectivePrice, isPromoted, getItemDiscount } = usePromotionsContext()
   const { showToast } = useToastContext()
 
   const [cartPop, setCartPop] = useState(false)
@@ -47,7 +47,8 @@ export function ProductDetail() {
 
   const inCart      = isInCart(product.id)
   const inWatchlist = isInWatchlist(product.id)
-  const promoted    = isPromoted(product.id)
+  const promoted       = isPromoted(product.id)
+  const itemDiscount   = getItemDiscount(product.id)
   const effectivePrice = getEffectivePrice(product)
 
   const handleAddToCart = () => {
@@ -84,7 +85,7 @@ export function ProductDetail() {
           {/* Imagem */}
           <div className={styles.imageSection}>
             {promoted && (
-              <div className={styles.promoBadge}>-{discount}% OFF</div>
+              <div className={styles.promoBadge}>-{itemDiscount}% OFF</div>
             )}
             <div className={styles.imageWrapper}>
               <img src={product.image} alt={product.title} className={styles.image} />
@@ -112,7 +113,7 @@ export function ProductDetail() {
               {promoted && (
                 <div className={styles.promoInfo}>
                   <span className={styles.originalPrice}>{formatPrice(product.price)}</span>
-                  <span className={styles.discountBadge}>-{discount}%</span>
+                  <span className={styles.discountBadge}>-{itemDiscount}%</span>
                 </div>
               )}
               <span className={`${styles.price} ${promoted ? styles.pricePromo : ''}`}>

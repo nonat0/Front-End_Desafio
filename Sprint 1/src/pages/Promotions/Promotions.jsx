@@ -1,15 +1,7 @@
 // Página Promotions — painel de gerenciamento de promoções.
-// Funcionalidades:
-//   - Grid de todos os produtos filtrável por nome (busca com debounce) e categoria
-//   - Seleção de até MAX_PROMO_ITEMS produtos com borda verde de feedback
-//   - Campo de % de desconto aplicado globalmente via PromotionsContext
-//   - Modal de erro exibido na posição atual do scroll ao tentar selecionar mais de 3
-//   - Produtos selecionados alimentam o carousel da Home automaticamente
-//   - Ao remover da promoção, o preço volta ao valor original da API
-
-// Nota de arquitetura:
-//   O estado de seleção é controlado inteiramente pelo PromotionsContext,
-//   garantindo que qualquer mudança aqui reflita globalmente na loja.
+// Cada item selecionado tem seu próprio percentual de desconto (0–50%).
+// O botão "Confirmar" só ativa quando o valor muda.
+// Um modal de segunda confirmação exibe o preço antes/depois antes de aplicar.
 
 import { useMemo, useState } from 'react'
 import { usePromotionsContext } from '@/context/PromotionsContext'
@@ -21,9 +13,10 @@ import { formatPrice, applyDiscount, truncateText, capitalize } from '@/utils/fo
 import { MAX_PROMO_ITEMS } from '@/utils/constants'
 import styles from './Promotions.module.css'
 
-/** Card individual de produto na grade de promoções */
-function PromoProductCard({ product, isSelected, onToggle, discount }) {
-  const effectivePrice = isSelected ? applyDiscount(product.price, discount) : product.price
+// ─── Card de produto na grade ────────────────────────────────────────────────
+
+function PromoProductCard({ product, isSelected, onToggle, itemDiscount }) {
+  const effectivePrice = isSelected ? applyDiscount(product.price, itemDiscount) : product.price
 
   return (
     <button
@@ -32,19 +25,16 @@ function PromoProductCard({ product, isSelected, onToggle, discount }) {
       aria-pressed={isSelected}
       aria-label={`${isSelected ? 'Remover' : 'Selecionar'} ${product.title}`}
     >
-      {/* Ícone de check quando selecionado */}
       <div className={`${styles.checkIcon} ${isSelected ? styles.checkVisible : ''}`}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
           <path d="M20 6 9 17l-5-5"/>
         </svg>
       </div>
 
-      {/* Imagem */}
       <div className={styles.cardImage}>
         <img src={product.image} alt={product.title} loading="lazy" />
       </div>
 
-      {/* Info */}
       <div className={styles.cardInfo}>
         <span className={styles.cardCategory}>{capitalize(product.category)}</span>
         <p className={styles.cardTitle}>{truncateText(product.title, 48)}</p>
@@ -55,8 +45,8 @@ function PromoProductCard({ product, isSelected, onToggle, discount }) {
           <span className={`${styles.cardPrice} ${isSelected ? styles.cardPricePromo : ''}`}>
             {formatPrice(effectivePrice)}
           </span>
-          {isSelected && discount > 0 && (
-            <span className={styles.cardDiscountBadge}>-{discount}%</span>
+          {isSelected && itemDiscount > 0 && (
+            <span className={styles.cardDiscountBadge}>-{itemDiscount}%</span>
           )}
         </div>
       </div>
@@ -64,31 +54,137 @@ function PromoProductCard({ product, isSelected, onToggle, discount }) {
   )
 }
 
+// ─── Linha de desconto individual por item ───────────────────────────────────
+// Exibida no painel abaixo do contador para cada produto selecionado.
+// Input: aceita apenas 1–50. Botão "Confirmar" ativa ao detectar mudança.
+// Ao confirmar abre modal de segunda confirmação com preço antes/depois.
+
+function ItemDiscountRow({ item, onConfirm }) {
+  const [inputValue, setInputValue] = useState(item.discount)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
+  // Mantém inputValue sincronizado se o desconto do item mudar externamente
+  // (ex: outro componente aplicou o desconto)
+  const isDirty = Number(inputValue) !== item.discount
+  const pendingDiscount = Number(inputValue)
+  const isValid = !isNaN(pendingDiscount) && pendingDiscount >= 0 && pendingDiscount <= 50
+
+  const handleChange = (e) => {
+    const raw = e.target.value
+    if (raw === '') { setInputValue(''); return }
+    // Clamp entre 1 e 50
+    const clamped = Math.min(50, Math.max(1, Number(raw)))
+    setInputValue(clamped)
+  }
+
+  const handleConfirmClick = () => {
+    if (!isDirty || !isValid) return
+    setConfirmOpen(true)
+  }
+
+  const handleApply = () => {
+    onConfirm(item.id, pendingDiscount)
+    setConfirmOpen(false)
+  }
+
+  const handleCancel = () => {
+    setConfirmOpen(false)
+  }
+
+  return (
+    <>
+      <div className={styles.discountRow}>
+        {/* Miniatura do produto */}
+        <img src={item.image} alt={item.title} className={styles.discountRowImg} />
+
+        {/* Nome truncado */}
+        <span className={styles.discountRowTitle}>{truncateText(item.title, 40)}</span>
+
+        {/* Input com limite 1–50 — borda âmbar quando valor pendente */}
+        <div className={`${styles.discountInputWrapper} ${isDirty ? styles.discountInputDirty : ''}`}>
+          <input
+            type="number"
+            min="1"
+            max="50"
+            value={inputValue}
+            onChange={handleChange}
+            className={styles.discountInput}
+            aria-label={`Desconto para ${item.title}`}
+          />
+          <span className={styles.discountSymbol}>%</span>
+        </div>
+
+        {/* Botão confirmar — desabilitado se valor não mudou ou for inválido */}
+        <button
+          className={styles.confirmBtn}
+          onClick={handleConfirmClick}
+          disabled={!isDirty || inputValue === '' || !isValid}
+        >
+          Confirmar
+        </button>
+
+        {/* Badge mostrando o desconto atualmente ativo */}
+        {item.discount > 0 && (
+          <span className={styles.activeDiscountBadge}>Ativo: -{item.discount}%</span>
+        )}
+      </div>
+
+      {/* Modal de segunda confirmação — mostra preço antes e depois */}
+      <Modal
+        isOpen={confirmOpen}
+        onClose={handleCancel}
+        title="Confirmar desconto"
+      >
+        <div className={styles.modalContent}>
+          <div className={styles.modalIcon}>🏷️</div>
+          <p className={styles.modalText}>
+            Você está prestes a aplicar um desconto de{' '}
+            <strong className={styles.modalHighlight}>-{pendingDiscount}%</strong>{' '}
+            para o produto:
+          </p>
+          <p className={styles.modalProductName}>{item.title}</p>
+          <div className={styles.modalPricePreview}>
+            <span className={styles.modalOriginalPrice}>{formatPrice(item.price)}</span>
+            <span className={styles.modalArrow}>→</span>
+            <span className={styles.modalFinalPrice}>
+              {formatPrice(applyDiscount(item.price, pendingDiscount))}
+            </span>
+          </div>
+          <div className={styles.modalActions}>
+            <button className={styles.modalCancelBtn} onClick={handleCancel}>
+              Cancelar
+            </button>
+            <button className={styles.modalConfirmBtn} onClick={handleApply}>
+              Confirmar desconto
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </>
+  )
+}
+
+// ─── Página principal ─────────────────────────────────────────────────────────
+
 export function Promotions() {
   const {
     promotedItems,
-    discount,
     isPromoted,
+    getItemDiscount,
     addPromoItem,
     removePromoItem,
-    setDiscount,
+    setItemDiscount,
     clearPromos,
   } = usePromotionsContext()
 
   const { products, categories, loading } = useProducts('all')
 
-  /* Busca local com debounce */
   const [searchInput, setSearchInput]       = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const debouncedSearch = useDebounce(searchInput, 300)
 
-  /* Modal de erro para limite de promoções atingido */
   const [errorModalOpen, setErrorModalOpen] = useState(false)
 
-  /**
-   * Alterna a seleção de um produto na lista de promoções.
-   * Se o limite MAX_PROMO_ITEMS for atingido, exibe o modal de erro.
-   */
   const handleToggle = (product) => {
     if (isPromoted(product.id)) {
       removePromoItem(product.id)
@@ -101,7 +197,6 @@ export function Promotions() {
     }
   }
 
-  /* Filtro aplicado localmente — busca por nome e categoria */
   const filteredProducts = useMemo(() => {
     let list = [...products]
     if (filterCategory !== 'all') {
@@ -118,12 +213,12 @@ export function Promotions() {
     <main className={styles.main}>
       <div className="container">
 
-        {/* ─── Cabeçalho ─── */}
+        {/* Cabeçalho */}
         <div className={styles.pageHeader}>
           <div>
             <h1 className={styles.pageTitle}>Promoções</h1>
             <p className={styles.pageDesc}>
-              Selecione até {MAX_PROMO_ITEMS} produtos para exibir no carousel e aplicar desconto global.
+              Selecione até {MAX_PROMO_ITEMS} produtos e defina o desconto individual de cada um (0–50%).
             </p>
           </div>
           {promotedItems.length > 0 && (
@@ -133,9 +228,8 @@ export function Promotions() {
           )}
         </div>
 
-        {/* ─── Painel de configuração ─── */}
+        {/* Contador de selecionados */}
         <div className={styles.configPanel}>
-          {/* Contador de selecionados */}
           <div className={styles.selectionInfo}>
             <div className={styles.selectionDots}>
               {Array.from({ length: MAX_PROMO_ITEMS }).map((_, i) => (
@@ -149,34 +243,23 @@ export function Promotions() {
               <strong>{promotedItems.length}</strong> de {MAX_PROMO_ITEMS} produtos selecionados
             </span>
           </div>
-
-          {/* Campo de desconto */}
-          <div className={styles.discountControl}>
-            <label htmlFor="discount-input" className={styles.discountLabel}>
-              Desconto aplicado
-            </label>
-            <div className={styles.discountInputWrapper}>
-              <input
-                id="discount-input"
-                type="number"
-                min="1"
-                max="99"
-                value={discount}
-                onChange={(e) => setDiscount(e.target.value)}
-                className={styles.discountInput}
-                aria-label="Percentual de desconto"
-              />
-              <span className={styles.discountSymbol}>%</span>
-            </div>
-            {promotedItems.length > 0 && (
-              <p className={styles.discountHint}>
-                Aplicado a {promotedItems.length} produto{promotedItems.length !== 1 ? 's' : ''} no carousel e na loja
-              </p>
-            )}
-          </div>
         </div>
 
-        {/* ─── Filtros ─── */}
+        {/* Painel de descontos individuais — aparece ao selecionar pelo menos 1 item */}
+        {promotedItems.length > 0 && (
+          <div className={styles.discountPanel}>
+            <h2 className={styles.discountPanelTitle}>Descontos individuais</h2>
+            {promotedItems.map((item) => (
+              <ItemDiscountRow
+                key={item.id}
+                item={item}
+                onConfirm={setItemDiscount}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Filtros */}
         <div className={styles.filters}>
           <input
             type="search"
@@ -199,16 +282,11 @@ export function Promotions() {
           </select>
         </div>
 
-        {/* ─── Grid de produtos ─── */}
+        {/* Grid de produtos */}
         {loading ? (
-          <div className={styles.loadingWrapper}>
-            <Spinner size="lg" />
-          </div>
+          <div className={styles.loadingWrapper}><Spinner size="lg" /></div>
         ) : filteredProducts.length === 0 ? (
-          <div className={styles.empty}>
-            <span>🔍</span>
-            <p>Nenhum produto encontrado.</p>
-          </div>
+          <div className={styles.empty}><span>🔍</span><p>Nenhum produto encontrado.</p></div>
         ) : (
           <div className={styles.grid}>
             {filteredProducts.map((product) => (
@@ -217,33 +295,26 @@ export function Promotions() {
                 product={product}
                 isSelected={isPromoted(product.id)}
                 onToggle={handleToggle}
-                discount={discount}
+                itemDiscount={getItemDiscount(product.id)}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* ─── Modal de erro — limite atingido ─── */}
-      <Modal
-        isOpen={errorModalOpen}
-        onClose={() => setErrorModalOpen(false)}
-        title="Limite atingido"
-      >
+      {/* Modal — limite de seleção atingido */}
+      <Modal isOpen={errorModalOpen} onClose={() => setErrorModalOpen(false)} title="Limite atingido">
         <div className={styles.modalContent}>
           <div className={styles.modalIcon}>⚠️</div>
           <p className={styles.modalText}>
             Você já selecionou o máximo de <strong>{MAX_PROMO_ITEMS} produtos</strong> em promoção simultaneamente.
           </p>
-          <p className={styles.modalHint}>
-            Remova um produto selecionado antes de adicionar outro.
-          </p>
-          <button
-            className={styles.modalCloseBtn}
-            onClick={() => setErrorModalOpen(false)}
-          >
-            Entendido
-          </button>
+          <p className={styles.modalHint}>Remova um produto antes de adicionar outro.</p>
+          <div className={styles.modalActions}>
+            <button className={styles.modalConfirmBtn} onClick={() => setErrorModalOpen(false)}>
+              Entendido
+            </button>
+          </div>
         </div>
       </Modal>
     </main>
