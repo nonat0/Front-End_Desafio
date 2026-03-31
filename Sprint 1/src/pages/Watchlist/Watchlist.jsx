@@ -10,6 +10,7 @@ import { usePromotionsContext } from '@/context/PromotionsContext'
 import { useToastContext } from '@/context/ToastContext'
 import { formatPrice, truncateText, formatRating } from '@/utils/formatters'
 import { Link } from 'react-router-dom'
+import logoNoBg from '@/img/logo no-bg.png'
 import styles from './Watchlist.module.css'
 
 function WatchlistCard({ product }) {
@@ -115,7 +116,7 @@ export function Watchlist() {
         {/* Grid ou estado vazio */}
         {items.length === 0 ? (
           <div className={styles.empty}>
-            <span className={styles.emptyIcon}>🤍</span>
+            <img src={logoNoBg} alt="DesenvolvStore" className={styles.emptyLogo} />
             <p className={styles.emptyTitle}>Nenhum produto salvo ainda</p>
             <p className={styles.emptyDesc}>
               Clique no ícone de coração nos produtos para adicioná-los aqui.

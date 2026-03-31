@@ -26,21 +26,11 @@
   text-decoration: none;
 }
 
-.logoIcon {
-  font-size: 1.4rem;
-  color: var(--color-accent);
-  line-height: 1;
+.logoImg {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
 }
-
-.logoText {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: 800;
-  color: var(--color-text);
-  letter-spacing: -0.02em;
-}
-
-.logoAccent { color: var(--color-accent); }
 
 /* --- Nav --- */
 .nav {

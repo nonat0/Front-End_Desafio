@@ -11,6 +11,7 @@ import { useWatchlistContext } from '@/context/WatchlistContext'
 import { useThemeContext } from '@/context/ThemeContext'
 import { useSearchContext } from '@/context/SearchContext'
 import { CartDrawer } from '@/components/cart/CartDrawer/CartDrawer'
+import logoNoBg from '@/img/logo no-bg.png'
 import styles from './Navbar.module.css'
 
 export function Navbar() {
@@ -41,8 +42,7 @@ export function Navbar() {
         <div className={`container ${styles.inner}`}>
           {/* Logo */}
           <Link to="/" className={styles.logo}>
-            <span className={styles.logoIcon}>◈</span>
-            <span className={styles.logoText}>Desenvolve<span className={styles.logoAccent}>Store</span></span>
+            <img src={logoNoBg} alt="DesenvolvStore" className={styles.logoImg} />
           </Link>
 
           {/* Nav links — desktop */}
