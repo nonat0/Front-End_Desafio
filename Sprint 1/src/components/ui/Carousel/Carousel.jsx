@@ -61,7 +61,7 @@ export function Carousel() {
           src={slide.image}
           alt={slide.title}
           className={styles.bgImage}
-          onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&q=80' }}
+          onError={(e) => { e.target.style.display = 'none' }}
         />
         <div className={styles.overlay} />
       </div>

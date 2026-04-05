@@ -2,6 +2,10 @@
 // Alterar valores aqui reflete em toda a aplicação,
 // facilitando manutenção e futuras integrações (ex: trocar API, ajustar limites).
 
+import banner1 from '@/img/banner-1.png'
+import banner2 from '@/img/banner-2.png'
+import banner3 from '@/img/banner-3.png'
+
 /* URL base da Fake Store API */
 export const API_BASE_URL = 'https://fakestoreapi.com'
 
@@ -28,18 +32,18 @@ export const CAROUSEL_FALLBACK = [
     id: 'fallback-1',
     title: 'Bem-vindo à Desenvolve Store',
     description: 'Os melhores produtos com os melhores preços. Explore nossa coleção completa.',
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&q=80',
+    image: banner1,
   },
   {
     id: 'fallback-2',
     title: 'Qualidade Garantida',
     description: 'Produtos selecionados com cuidado para a melhor experiência de compra.',
-    image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&q=80',
+    image: banner2,
   },
   {
     id: 'fallback-3',
     title: 'Entrega Rápida e Segura',
     description: 'Receba seus pedidos com agilidade e total segurança.',
-    image: 'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1200&q=80',
+    image: banner3,
   },
 ]
