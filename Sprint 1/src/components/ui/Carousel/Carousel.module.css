@@ -69,7 +69,6 @@
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
   width: fit-content;
-  margin-bottom: var(--space-4);
 }
 
 .title {
