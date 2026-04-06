@@ -6,6 +6,7 @@
 
 import { Outlet } from 'react-router-dom'
 import { Navbar } from '@/components/layout/Navbar/Navbar'
+import { Footer } from '@/components/layout/Footer/Footer'
 import { ToastContainer } from '@/components/ui/Toast/Toast'
 import { useToastContext } from '@/context/ToastContext'
 import styles from './AppLayout.module.css'
@@ -19,6 +20,7 @@ export function AppLayout() {
       <div className={styles.content}>
         <Outlet />
       </div>
+      <Footer />
       {/* Notificações globais — montado uma única vez aqui */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>

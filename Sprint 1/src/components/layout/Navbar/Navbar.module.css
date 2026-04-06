@@ -3,10 +3,9 @@
   top: 0;
   z-index: 100;
   height: var(--navbar-height);
-  background: rgba(var(--color-bg-rgb, 247 245 240 / 1), 0.9);
-  background-color: var(--color-bg);
+  background: var(--gradient-purple);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
   transition: background var(--transition-base);
 }
 
@@ -47,12 +46,12 @@
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: 500;
-  color: var(--color-text-2);
+  color: rgba(255,255,255,0.75);
   transition: color var(--transition-fast), background var(--transition-fast);
   white-space: nowrap;
 }
-.navLink:hover { color: var(--color-text); background: var(--color-bg-2); }
-.navLinkActive { color: var(--color-text); background: var(--color-bg-2); }
+.navLink:hover { color: #fff; background: rgba(255,255,255,0.12); }
+.navLinkActive { color: #fff; background: rgba(255,255,255,0.15); }
 
 .badge {
   display: inline-flex;
@@ -79,15 +78,16 @@
   width: 100%;
   display: flex;
   align-items: center;
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: var(--radius-full);
   overflow: hidden;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .searchForm:focus-within {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.12);
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.4);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
 }
 
 .searchInput {
@@ -96,21 +96,21 @@
   border: none;
   padding: var(--space-2) var(--space-4);
   font-size: var(--text-sm);
-  color: var(--color-text);
+  color: #fff;
   outline: none;
   min-width: 0;
 }
-.searchInput::placeholder { color: var(--color-text-3); }
+.searchInput::placeholder { color: rgba(255,255,255,0.55); }
 
 .searchBtn {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-2) var(--space-3);
-  color: var(--color-text-2);
+  color: rgba(255,255,255,0.7);
   transition: color var(--transition-fast);
 }
-.searchBtn:hover { color: var(--color-accent); }
+.searchBtn:hover { color: #fff; }
 
 /* --- Ações --- */
 .actions {
@@ -128,12 +128,12 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-md);
-  color: var(--color-text-2);
+  color: rgba(255,255,255,0.8);
   transition: color var(--transition-fast), background var(--transition-fast);
 }
 .iconBtn:hover {
-  color: var(--color-text);
-  background: var(--color-bg-2);
+  color: #fff;
+  background: rgba(255,255,255,0.12);
 }
 
 .cartBadge {
