@@ -11,19 +11,44 @@ import { formatPrice, applyDiscount } from '@/utils/formatters'
 import { useNavigate } from 'react-router-dom'
 import styles from './Carousel.module.css'
 
+/* Pré-escaneia todos os arquivos em src/img/promobg/ em build time */
+const promoBgs = import.meta.glob('../../../img/promobg/*', { eager: true, import: 'default' })
+
+/* Retorna a URL do background para o produto:
+   1. Imagem específica pelo ID  (ex: 3.jpg)
+   2. Imagem global              (ex: global.jpg)
+   3. undefined → fallback para o gradiente CSS */
+function getPromoBg(productId) {
+  const specific = Object.entries(promoBgs).find(([path]) =>
+    path.match(new RegExp(`/${productId}\\.[^/]+$`))
+  )
+  if (specific) return specific[1]
+
+  const global = Object.entries(promoBgs).find(([path]) =>
+    path.match(/\/global\.[^/]+$/)
+  )
+  return global ? global[1] : undefined
+}
+
 export function Carousel() {
   const { promotedItems } = usePromotionsContext()
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
 
+  const isPromo = promotedItems.length > 0
+
   /* Monta slides a partir dos produtos promovidos ou usa fallback */
-  const slides = promotedItems.length > 0
+  const slides = isPromo
     ? promotedItems.map((p) => ({
         id: p.id,
         title: p.title,
-        description: `${p.discount}% de desconto • De ${formatPrice(p.price)} por ${formatPrice(applyDiscount(p.price, p.discount))}`,
+        discount: p.discount,
+        originalPrice: formatPrice(p.price),
+        promoPrice: formatPrice(applyDiscount(p.price, p.discount)),
+        description: p.description,
         image: p.image,
+        background: getPromoBg(p.id),
         productId: p.id,
       }))
     : CAROUSEL_FALLBACK
@@ -54,34 +79,60 @@ export function Carousel() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Imagem de fundo com overlay */}
-      <div className={styles.bg}>
-        <img
-          key={slide.id}
-          src={slide.image}
-          alt={slide.title}
-          className={styles.bgImage}
-          onError={(e) => { e.target.style.display = 'none' }}
-        />
-        <div className={styles.overlay} />
-      </div>
+      {isPromo ? (
+        /* Layout promocional: duas colunas — imagem | info */
+        <div
+          className={styles.promoLayout}
+          style={slide.background ? { backgroundImage: `url(${slide.background})` } : undefined}
+        >
+          {slide.background && <div className={styles.promoBgOverlay} />}
+          <div className={styles.promoImageBox}>
+            <img
+              key={slide.id + '-img'}
+              src={slide.image}
+              alt={slide.title}
+              className={styles.promoProductImage}
+              onError={(e) => { e.target.style.display = 'none' }}
+            />
+          </div>
 
-      {/* Conteúdo do slide */}
-      <div className={styles.content}>
-        {promotedItems.length > 0 && (
-          <span className={styles.promoBadge}>🔥 Promoção</span>
-        )}
-        <h1 className={styles.title}>{slide.title}</h1>
-        <p className={styles.description}>{slide.description}</p>
-        {slide.productId && (
-          <button
-            className={styles.cta}
-            onClick={() => navigate(`/product/${slide.productId}`)}
-          >
-            Ver produto
-          </button>
-        )}
-      </div>
+          <div key={slide.id + '-info'} className={styles.promoInfoBox}>
+            <div className={styles.promoBadges}>
+              <span className={styles.promoBadge}>🔥 Promoção</span>
+              <span className={styles.promoDiscountBadge}>−{slide.discount}%</span>
+            </div>
+            <h1 className={styles.promoTitle}>{slide.title}</h1>
+            <div className={styles.promoPricing}>
+              <span className={styles.promoOriginalPrice}>De {slide.originalPrice}</span>
+              <span className={styles.promoFinalPrice}>Por {slide.promoPrice}</span>
+            </div>
+            <button
+              className={styles.cta}
+              onClick={() => navigate(`/product/${slide.productId}`)}
+            >
+              Ver produto
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Layout padrão: imagem de fundo com overlay e texto */
+        <>
+          <div className={styles.bg}>
+            <img
+              key={slide.id}
+              src={slide.image}
+              alt={slide.title}
+              className={styles.bgImage}
+              onError={(e) => { e.target.style.display = 'none' }}
+            />
+            <div className={styles.overlay} />
+          </div>
+          <div className={styles.content}>
+            <h1 className={styles.title}>{slide.title}</h1>
+            <p className={styles.description}>{slide.description}</p>
+          </div>
+        </>
+      )}
 
       {/* Controles de navegação */}
       {slides.length > 1 && (

@@ -69,9 +69,14 @@
 }
 
 /* --- Busca --- */
-.searchForm {
+.searchWrapper {
+  position: relative;
   flex: 1;
   max-width: 340px;
+}
+
+.searchForm {
+  width: 100%;
   display: flex;
   align-items: center;
   background: var(--color-surface-2);
@@ -172,7 +177,7 @@
 
 /* --- Responsive --- */
 @media (max-width: 900px) {
-  .nav, .searchForm { display: none; }
+  .nav, .searchWrapper { display: none; }
   .menuBtn { display: flex; }
   .header  { height: auto; }
   .inner   { height: var(--navbar-height); }

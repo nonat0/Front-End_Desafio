@@ -11,6 +11,7 @@ import { useWatchlistContext } from '@/context/WatchlistContext'
 import { useThemeContext } from '@/context/ThemeContext'
 import { useSearchContext } from '@/context/SearchContext'
 import { CartDrawer } from '@/components/cart/CartDrawer/CartDrawer'
+import { SearchPopup } from './SearchPopup'
 import logoNoBg from '@/img/logo no-bg.png'
 import styles from './Navbar.module.css'
 
@@ -23,6 +24,7 @@ export function Navbar() {
 
   const [cartOpen, setCartOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchFocused, setSearchFocused] = useState(false)
 
   // Só exibe a barra de busca na página inicial
   const isHome = location.pathname === '/'
@@ -34,6 +36,11 @@ export function Navbar() {
   // Impede submit padrão — a busca já é reativa ao onChange
   const handleSearchSubmit = (e) => {
     e.preventDefault()
+  }
+
+  const closePopup = () => {
+    setSearchFocused(false)
+    setSearchQuery('')
   }
 
   return (
@@ -61,21 +68,29 @@ export function Navbar() {
 
           {/* Busca — só aparece na Home */}
           {isHome && (
-            <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
-              <input
-                type="search"
-                placeholder="Buscar produtos…"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className={styles.searchInput}
-                aria-label="Buscar produtos"
-              />
-              <button type="submit" className={styles.searchBtn} aria-label="Pesquisar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
-              </button>
-            </form>
+            <div className={styles.searchWrapper}>
+              <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
+                <input
+                  type="search"
+                  placeholder="Buscar produtos…"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  className={styles.searchInput}
+                  aria-label="Buscar produtos"
+                  autoComplete="off"
+                />
+                <button type="submit" className={styles.searchBtn} aria-label="Pesquisar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                  </svg>
+                </button>
+              </form>
+              {searchFocused && searchQuery.trim() && (
+                <SearchPopup query={searchQuery} onClose={closePopup} />
+              )}
+            </div>
           )}
 
           {/* Ações */}
