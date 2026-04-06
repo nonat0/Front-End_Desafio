@@ -95,6 +95,9 @@
    DARK MODE
    ===================================================== */
 [data-theme="dark"] {
+
+  --gradient-purple: linear-gradient(135deg, #000000 0%, #7C3AED 50%, #A855F7 100%);
+  
   /* --- Nebula — azul-escuro profundo + roxo médio --- */
   --color-bg:           #0F0F14;
   --color-bg-2:         #16161E;
