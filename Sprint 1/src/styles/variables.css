@@ -24,7 +24,7 @@
   --color-accent-rgb:   124, 58, 237;
 
   /* --- Gradiente roxo — usado em navbar e botões --- */
-  --gradient-purple: linear-gradient(135deg, #6D28D9 0%, #7C3AED 50%, #A855F7 100%);
+  --gradient-purple: linear-gradient(135deg, #ffffff 0%, #7C3AED 50%, #A855F7 100%);
 
   /* --- Promoção (verde esmeralda) --- */
   --color-promo:        #059669;
