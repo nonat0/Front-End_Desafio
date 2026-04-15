@@ -173,11 +173,82 @@
   padding-top: var(--space-5);
 }
 
+/* --- Opções (tamanho/armazenamento/polegadas) --- */
+.sizeBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sizeLabel {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-2);
+}
+
+.sizeSelected {
+  margin-left: var(--space-1);
+  color: var(--color-accent);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 600;
+}
+
+.sizeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.sizeOption {
+  min-width: 56px;
+  padding: var(--space-2) var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.sizeOption:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.sizeOptionActive {
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
 /* --- Ações --- */
 .actions {
   display: flex;
   gap: var(--space-3);
 }
+
+.buyBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  background: var(--gradient-button);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-base);
+  border-radius: var(--radius-lg);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+.buyBtn:hover { opacity: 0.88; transform: translateY(-2px); }
 
 .cartBtn {
   flex: 1;
@@ -186,16 +257,17 @@
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-6);
-  background: var(--gradient-purple);
-  color: #fff;
+  background: transparent;
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--text-base);
   border-radius: var(--radius-lg);
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
-.cartBtn:hover { opacity: 0.88; transform: translateY(-2px); }
-.cartActive    { background: var(--color-btn-confirmed) !important; color: var(--color-btn-confirmed-text) !important; }
+.cartBtn:hover { background: var(--color-accent-light); transform: translateY(-2px); }
+.cartActive    { background: var(--color-btn-confirmed) !important; color: var(--color-btn-confirmed-text) !important; border-color: var(--color-btn-confirmed) !important; }
 
 .watchBtn {
   display: flex;

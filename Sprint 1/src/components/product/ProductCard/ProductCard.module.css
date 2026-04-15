@@ -161,23 +161,6 @@
   border-color: #7C3AED !important;
 }
 
-.cartBtn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  height: 38px;
-  border-radius: var(--radius-md);
-  background: var(--gradient-purple);
-  color: #fff;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
-}
-.cartBtn:hover { opacity: 0.88; transform: translateY(-1px); }
-.cartActive    { background: var(--color-btn-confirmed) !important; color: var(--color-btn-confirmed-text) !important; }
-
 /* --- Animação de pop no clique --- */
 @keyframes pop {
   0%   { transform: scale(1); }

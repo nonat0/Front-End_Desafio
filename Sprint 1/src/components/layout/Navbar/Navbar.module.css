@@ -3,7 +3,7 @@
   top: 0;
   z-index: 100;
   height: var(--navbar-height);
-  background: var(--gradient-purple);
+  background: var(--gradient-navbar);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255,255,255,0.12);
   transition: background var(--transition-base);

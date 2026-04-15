@@ -23,6 +23,7 @@ function CartItem({ item }) {
       </div>
       <div className={styles.itemInfo}>
         <p className={styles.itemTitle}>{truncateText(item.title, 40)}</p>
+        {item.size && <span className={styles.itemSize}>{item.size}</span>}
         <div className={styles.itemPriceRow}>
           {promoted && (
             <span className={styles.itemOriginalPrice}>{formatPrice(item.price)}</span>
@@ -34,21 +35,21 @@ function CartItem({ item }) {
         <div className={styles.itemControls}>
           <button
             className={styles.qtyBtn}
-            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+            onClick={() => updateQuantity(item.cartKey, item.quantity - 1)}
             disabled={item.quantity <= 1}
             aria-label="Diminuir quantidade"
           >−</button>
           <span className={styles.qty}>{item.quantity}</span>
           <button
             className={styles.qtyBtn}
-            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+            onClick={() => updateQuantity(item.cartKey, item.quantity + 1)}
             aria-label="Aumentar quantidade"
           >+</button>
         </div>
       </div>
       <button
         className={styles.removeBtn}
-        onClick={() => removeFromCart(item.id)}
+        onClick={() => removeFromCart(item.cartKey)}
         aria-label="Remover item"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -107,7 +108,7 @@ export function CartDrawer({ isOpen, onClose }) {
         ) : (
           <>
             <div className={styles.itemsList}>
-              {items.map((item) => <CartItem key={item.id} item={item} />)}
+              {items.map((item) => <CartItem key={item.cartKey} item={item} />)}
             </div>
 
             {/* Footer com total */}

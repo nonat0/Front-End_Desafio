@@ -131,6 +131,20 @@
   margin-bottom: var(--space-1);
 }
 
+.itemSize {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 2px 8px;
+  margin-bottom: var(--space-1);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-full);
+}
+
 .itemPriceRow {
   display: flex;
   align-items: baseline;

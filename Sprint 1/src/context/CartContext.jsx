@@ -19,23 +19,33 @@ import { usePromotionsContext } from './PromotionsContext'
 
 const CartContext = createContext(null)
 
+/**
+ * Chave composta que identifica uma linha do carrinho.
+ * Produtos iguais com variantes diferentes (ex: tamanho P vs M)
+ * viram linhas separadas no carrinho.
+ */
+export function makeCartKey(id, size) {
+  return `${id}::${size ?? ''}`
+}
+
 function cartReducer(state, action) {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existing = state.find((i) => i.id === action.payload.id)
+      const { product, size } = action.payload
+      const cartKey = makeCartKey(product.id, size)
+      const existing = state.find((i) => i.cartKey === cartKey)
       if (existing) {
-        /* Se já existe, incrementa a quantidade */
         return state.map((i) =>
-          i.id === action.payload.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.cartKey === cartKey ? { ...i, quantity: i.quantity + 1 } : i
         )
       }
-      return [...state, { ...action.payload, quantity: 1 }]
+      return [...state, { ...product, size: size ?? null, cartKey, quantity: 1 }]
     }
     case 'REMOVE_ITEM':
-      return state.filter((i) => i.id !== action.payload)
+      return state.filter((i) => i.cartKey !== action.payload)
     case 'UPDATE_QUANTITY':
       return state.map((i) =>
-        i.id === action.payload.id
+        i.cartKey === action.payload.cartKey
           ? { ...i, quantity: Math.max(1, action.payload.quantity) }
           : i
       )
@@ -49,7 +59,9 @@ function cartReducer(state, action) {
 export function CartProvider({ children }) {
   const [items, dispatch] = useReducer(
     cartReducer,
-    getItem(STORAGE_KEYS.CART, [])
+    getItem(STORAGE_KEYS.CART, []).map((i) =>
+      i.cartKey ? i : { ...i, size: i.size ?? null, cartKey: makeCartKey(i.id, i.size ?? null) }
+    )
   )
   const { getEffectivePrice } = usePromotionsContext()
 
@@ -57,16 +69,16 @@ export function CartProvider({ children }) {
     setItem(STORAGE_KEYS.CART, items)
   }, [items])
 
-  const addToCart = useCallback((product) => {
-    dispatch({ type: 'ADD_ITEM', payload: product })
+  const addToCart = useCallback((product, size = null) => {
+    dispatch({ type: 'ADD_ITEM', payload: { product, size } })
   }, [])
 
-  const removeFromCart = useCallback((productId) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: productId })
+  const removeFromCart = useCallback((cartKey) => {
+    dispatch({ type: 'REMOVE_ITEM', payload: cartKey })
   }, [])
 
-  const updateQuantity = useCallback((productId, quantity) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } })
+  const updateQuantity = useCallback((cartKey, quantity) => {
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { cartKey, quantity } })
   }, [])
 
   const clearCart = useCallback(() => {

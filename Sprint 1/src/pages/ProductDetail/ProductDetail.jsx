@@ -4,14 +4,14 @@
 // Contém botões de carrinho e watchlist com feedbacks visuais via toast.
 // Expansível para: galeria de imagens, comentários, produtos relacionados, rating por usuário.
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useProductDetail } from '@/hooks/useProductDetail'
 import { useCartContext } from '@/context/CartContext'
 import { useWatchlistContext } from '@/context/WatchlistContext'
 import { usePromotionsContext } from '@/context/PromotionsContext'
 import { useToastContext } from '@/context/ToastContext'
-import { formatPrice, formatRating, capitalize } from '@/utils/formatters'
+import { formatPrice, formatRating, capitalize, getProductSizeOptions } from '@/utils/formatters'
 import { Spinner } from '@/components/ui/Spinner/Spinner'
 import styles from './ProductDetail.module.css'
 
@@ -26,6 +26,13 @@ export function ProductDetail() {
   const { showToast } = useToastContext()
 
   const [cartPop, setCartPop] = useState(false)
+
+  const sizeOptions = useMemo(() => (product ? getProductSizeOptions(product) : null), [product])
+  const [selectedSize, setSelectedSize] = useState(null)
+
+  useEffect(() => {
+    if (sizeOptions?.options?.length) setSelectedSize(sizeOptions.options[0])
+  }, [sizeOptions])
 
   if (loading) {
     return (
@@ -52,8 +59,9 @@ export function ProductDetail() {
   const effectivePrice = getEffectivePrice(product)
 
   const handleAddToCart = () => {
-    addToCart(product)
-    showToast('Adicionado ao carrinho!', 'success')
+    addToCart(product, selectedSize)
+    const sizeMsg = selectedSize ? ` (${selectedSize})` : ''
+    showToast(`Adicionado ao carrinho!${sizeMsg}`, 'success')
     setCartPop(true)
     setTimeout(() => setCartPop(false), 400)
   }
@@ -129,8 +137,40 @@ export function ProductDetail() {
             {/* Descrição */}
             <p className={styles.description}>{product.description}</p>
 
+            {/* Opções (tamanho/armazenamento/polegadas) */}
+            {sizeOptions && (
+              <div className={styles.sizeBlock}>
+                <span className={styles.sizeLabel}>
+                  {sizeOptions.label}
+                  {selectedSize && <span className={styles.sizeSelected}>: {selectedSize}</span>}
+                </span>
+                <div className={styles.sizeOptions}>
+                  {sizeOptions.options.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      className={`${styles.sizeOption} ${selectedSize === opt ? styles.sizeOptionActive : ''}`}
+                      onClick={() => setSelectedSize(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Ações */}
             <div className={styles.actions}>
+              <button
+                className={`${styles.buyBtn} ${cartPop ? styles.pop : ''}`}
+                onClick={handleAddToCart}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12h14M13 6l6 6-6 6"/>
+                </svg>
+                Comprar agora
+              </button>
+
               <button
                 className={`${styles.cartBtn} ${inCart ? styles.cartActive : ''} ${cartPop ? styles.pop : ''}`}
                 onClick={handleAddToCart}

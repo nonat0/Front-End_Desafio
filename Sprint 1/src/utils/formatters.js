@@ -54,3 +54,24 @@ export function capitalize(str) {
 export function formatRating(rating) {
   return Number(rating).toFixed(1)
 }
+
+/**
+ * Retorna as opções de tamanho/variante para um produto conforme sua categoria.
+ * Roupas → P, M, G. Jóias → tamanho único. Eletrônicos → armazenamento ou polegadas (monitor).
+ * @param {object} product
+ * @returns {{ label: string, options: string[] }}
+ */
+export function getProductSizeOptions(product) {
+  const category = (product?.category || '').toLowerCase()
+  const title    = (product?.title    || '').toLowerCase()
+
+  /* Apenas roupas reais (não mochilas) têm grade de tamanhos */
+  if (
+    (category === "men's clothing" || category === "women's clothing") &&
+    !title.includes('backpack')
+  ) {
+    return { label: 'Tamanho', options: ['P', 'M', 'G'] }
+  }
+
+  return null
+}

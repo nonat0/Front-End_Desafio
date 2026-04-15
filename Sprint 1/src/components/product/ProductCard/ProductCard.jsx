@@ -1,12 +1,9 @@
 // ProductCard — card de produto reutilizável.
 // Exibe: imagem, badge de promoção, título truncado, preço efetivo,
-// rating, botão de adicionar ao carrinho e botão de watchlist.
-// Usa `getEffectivePrice` do PromotionsContext para exibir preço correto globalmente.
-// Os botões disparam toasts de feedback visual via ToastContext.
+// rating e botão de watchlist. A compra acontece apenas na página de detalhes.
 
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useCartContext } from '@/context/CartContext'
 import { useWatchlistContext } from '@/context/WatchlistContext'
 import { usePromotionsContext } from '@/context/PromotionsContext'
 import { useToastContext } from '@/context/ToastContext'
@@ -14,29 +11,16 @@ import { formatPrice, truncateText, formatRating } from '@/utils/formatters'
 import styles from './ProductCard.module.css'
 
 export function ProductCard({ product }) {
-  const { addToCart, isInCart } = useCartContext()
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlistContext()
   const { getEffectivePrice, isPromoted, getItemDiscount } = usePromotionsContext()
   const { showToast } = useToastContext()
 
-  /* Controla animação de feedback no botão do carrinho */
-  const [cartPop, setCartPop] = useState(false)
   const [watchPop, setWatchPop] = useState(false)
 
-  const inCart      = isInCart(product.id)
   const inWatchlist = isInWatchlist(product.id)
   const promoted    = isPromoted(product.id)
   const itemDiscount   = getItemDiscount(product.id)
   const effectivePrice = getEffectivePrice(product)
-
-  const handleAddToCart = (e) => {
-    e.preventDefault()
-    addToCart(product)
-    showToast(`"${truncateText(product.title, 30)}" adicionado ao carrinho!`, 'success')
-    /* Micro-animação no botão */
-    setCartPop(true)
-    setTimeout(() => setCartPop(false), 400)
-  }
 
   const handleToggleWatchlist = (e) => {
     e.preventDefault()
@@ -90,7 +74,7 @@ export function ProductCard({ product }) {
           <span className={styles.ratingCount}>({product.rating?.count})</span>
         </div>
 
-        {/* Rodapé: preço + botão na mesma linha */}
+        {/* Rodapé: apenas preço */}
         <div className={styles.footer}>
           <div className={styles.priceBlock}>
             <span className={styles.priceLabel}>Preço</span>
@@ -101,14 +85,6 @@ export function ProductCard({ product }) {
               {formatPrice(effectivePrice)}
             </span>
           </div>
-
-          <button
-            className={`${styles.cartBtn} ${inCart ? styles.cartActive : ''} ${cartPop ? styles.pop : ''}`}
-            onClick={handleAddToCart}
-            aria-label="Adicionar ao carrinho"
-          >
-            {inCart ? 'No carrinho' : 'Adicionar'}
-          </button>
         </div>
       </div>
     </Link>

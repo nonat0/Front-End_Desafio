@@ -23,8 +23,9 @@
   --color-accent-light: #F0E8FF;
   --color-accent-rgb:   124, 58, 237;
 
-  /* --- Gradiente roxo — usado em navbar e botões --- */
-  --gradient-purple: linear-gradient(135deg, #ffffff 0%, #7C3AED 50%, #A855F7 100%);
+  /* --- Gradientes — navbar e botões têm paletas independentes --- */
+  --gradient-navbar: linear-gradient(135deg, #ffffff 0%, #7C3AED 50%, #A855F7 100%);
+  --gradient-button: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
 
   /* --- Promoção (verde esmeralda) --- */
   --color-promo:        #059669;
@@ -96,7 +97,8 @@
    ===================================================== */
 [data-theme="dark"] {
 
-  --gradient-purple: linear-gradient(135deg, #000000 0%, #7C3AED 50%, #A855F7 100%);
+  --gradient-navbar: linear-gradient(135deg, #000000 0%, #7C3AED 50%, #A855F7 100%);
+  --gradient-button: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 100%);
   
   /* --- Nebula — azul-escuro profundo + roxo médio --- */
   --color-bg:           #0F0F14;
