@@ -61,8 +61,11 @@ export function Navbar() {
               Watchlist
               {watchCount > 0 && <span className={styles.badge}>{watchCount}</span>}
             </NavLink>
-            <NavLink to="/promotions" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}>
-              Promoções
+            <NavLink to="/black-friday" className={({ isActive }) => `${styles.navLink} ${styles.navLinkBf} ${isActive ? styles.navLinkActive : ''}`}>
+              Black Friday
+            </NavLink>
+            <NavLink to="/admin" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}>
+              Admin
             </NavLink>
           </nav>
 
@@ -144,7 +147,8 @@ export function Navbar() {
             <NavLink to="/watchlist" onClick={() => setMenuOpen(false)} className={styles.mobileLink}>
               Watchlist {watchCount > 0 && `(${watchCount})`}
             </NavLink>
-            <NavLink to="/promotions" onClick={() => setMenuOpen(false)} className={styles.mobileLink}>Promoções</NavLink>
+            <NavLink to="/black-friday" onClick={() => setMenuOpen(false)} className={`${styles.mobileLink} ${styles.mobileLinkBf}`}>Black Friday</NavLink>
+            <NavLink to="/admin" onClick={() => setMenuOpen(false)} className={styles.mobileLink}>Admin</NavLink>
           </div>
         )}
       </header>

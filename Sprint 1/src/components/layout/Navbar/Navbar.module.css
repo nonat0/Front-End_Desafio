@@ -53,6 +53,22 @@
 .navLink:hover { color: #fff; background: rgba(255,255,255,0.12); }
 .navLinkActive { color: #fff; background: rgba(255,255,255,0.15); }
 
+/* Destaque especial para o link de Black Friday */
+.navLinkBf {
+  position: relative;
+  color: #FDE68A;
+  font-weight: 700;
+}
+.navLinkBf::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(168, 85, 247, 0.18));
+  pointer-events: none;
+}
+.navLinkBf:hover { color: #fff; }
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -174,6 +190,11 @@
   transition: color var(--transition-fast), background var(--transition-fast);
 }
 .mobileLink:hover { color: var(--color-text); background: var(--color-bg-2); }
+
+.mobileLinkBf {
+  color: var(--color-accent);
+  font-weight: 700;
+}
 
 /* --- Responsive --- */
 @media (max-width: 900px) {

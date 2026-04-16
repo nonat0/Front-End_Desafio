@@ -12,6 +12,7 @@ import { Home } from '@/pages/Home/Home'
 import { ProductDetail } from '@/pages/ProductDetail/ProductDetail'
 import { Watchlist } from '@/pages/Watchlist/Watchlist'
 import { Promotions } from '@/pages/Promotions/Promotions'
+import { BlackFriday } from '@/pages/BlackFriday/BlackFriday'
 
 const router = createBrowserRouter([
   {
@@ -22,7 +23,8 @@ const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: 'product/:id', element: <ProductDetail /> },
       { path: 'watchlist', element: <Watchlist /> },
-      { path: 'promotions', element: <Promotions /> },
+      { path: 'admin', element: <Promotions /> },
+      { path: 'black-friday', element: <BlackFriday /> },
     ],
   },
 ])
