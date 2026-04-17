@@ -26,6 +26,35 @@ export const TOAST_DURATION = 3000
 /* Intervalo de auto-troca do carousel em milissegundos */
 export const CAROUSEL_INTERVAL = 4500
 
+/*
+ * TTL (Time To Live) do cache de requisições em milissegundos.
+ 
+ * Após esse período, uma entrada do cache é considerada "velha" e será
+   descartada — forçando uma nova chamada à API. O valor de 5 minutos
+   equilibra performance (evita requests repetidos em navegação rápida)
+   com frescor dos dados (catálogo pode mudar no servidor).
+ 
+ * Antes do TTL, o cache apenas crescia até a página ser recarregada.
+ */
+export const CACHE_TTL = 5 * 60 * 1000
+
+/*
+ * Parâmetros do retry automático aplicado no interceptor do Axios.
+ 
+  - MAX_ATTEMPTS: número máximo de re-tentativas após a falha inicial.
+  - BASE_DELAY_MS: tempo de espera da PRIMEIRA re-tentativa.
+  - MAX_DELAY_MS:  teto de espera para evitar delays absurdos.
+ 
+  Usamos backoff exponencial — cada tentativa espera o dobro da anterior
+  (500ms → 1000ms → 2000ms …), limitado por MAX_DELAY_MS. Isso dá tempo
+  para a rede/servidor se recuperar sem martelar o backend.
+ */
+export const API_RETRY = {
+  MAX_ATTEMPTS: 2,
+  BASE_DELAY_MS: 500,
+  MAX_DELAY_MS: 4000,
+}
+
 /* Fallback para o carousel quando não há promoções ativas */
 export const CAROUSEL_FALLBACK = [
   {
