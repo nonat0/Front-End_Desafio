@@ -38,10 +38,10 @@ function useCountdown() {
 }
 
 export function BlackFriday() {
-  const { promotedItems } = usePromotionsContext()
+  const { eventItems } = usePromotionsContext()
   const { hours, minutes, seconds } = useCountdown()
 
-  const products = useMemo(() => promotedItems ?? [], [promotedItems])
+  const products = useMemo(() => eventItems ?? [], [eventItems])
 
   return (
     <main className={styles.main}>

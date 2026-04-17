@@ -30,6 +30,76 @@
 }
 .clearBtn:hover { color: var(--color-error); border-color: var(--color-error); }
 
+/* ─── Abas de canais (Eventos / Pontuais) ─── */
+.tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  margin-bottom: -1px;
+}
+.tab:hover { color: var(--color-text); }
+
+.tabActive {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.tabLabel {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.tabHint {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tabCount {
+  background: var(--color-bg-2);
+  color: var(--color-text-2);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  min-width: 22px;
+  text-align: center;
+}
+.tabActive .tabCount {
+  background: var(--color-promo-light);
+  color: var(--color-promo);
+}
+
+/* Cabeçalho descritivo dentro da seção ativa */
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
 /* ─── Painel contador ─── */
 .configPanel {
   background: var(--color-surface);
@@ -63,6 +133,15 @@
 .selectionText {
   font-size: var(--text-sm);
   color: var(--color-text-2);
+}
+
+.unlimitedHint {
+  font-style: normal;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* ─── Painel de descontos individuais ─── */

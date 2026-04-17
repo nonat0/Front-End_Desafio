@@ -1,6 +1,8 @@
 // PromotionsContext — núcleo do sistema de promoções.
-// Cada item promovido carrega seu próprio percentual de desconto individual.
-// getEffectivePrice() lê o desconto do próprio item, não mais um valor global.
+// Dois canais independentes de promoção, cada um com seu próprio limite e estado:
+//   - eventItems → alimentam o grid da página Black Friday
+//   - spotItems  → alimentam o carousel da página inicial
+// Cada item carrega seu próprio percentual de desconto individual.
 
 import {
   createContext,
@@ -15,36 +17,53 @@ import { getItem, setItem } from '@/services/storage/localStorage'
 
 const PromotionsContext = createContext(null)
 
-const initialState = {
-  // Cada item carrega { ...produto, discount: number } — desconto individual
-  promotedItems: getItem(STORAGE_KEYS.PROMOTIONS, { items: [] }).items,
+// Migração do formato antigo ({ items: [...] }) → novo formato ({ events, spots }).
+// Itens do formato antigo caem no canal "spots" porque era o que alimentava o carousel.
+function loadInitialState() {
+  const stored = getItem(STORAGE_KEYS.PROMOTIONS, null)
+  if (!stored) return { eventItems: [], spotItems: [] }
+  if (Array.isArray(stored.items)) {
+    return { eventItems: [], spotItems: stored.items }
+  }
+  return {
+    eventItems: stored.events ?? [],
+    spotItems: stored.spots ?? [],
+  }
 }
 
+const initialState = loadInitialState()
+
+// Reducer genérico parametrizado pela chave da lista (eventItems | spotItems).
 function promotionsReducer(state, action) {
-  switch (action.type) {
+  const { type, list } = action
+  const key = list // 'eventItems' ou 'spotItems'
+
+  switch (type) {
     case 'ADD_ITEM': {
-      if (state.promotedItems.length >= MAX_PROMO_ITEMS) return state
-      if (state.promotedItems.find((p) => p.id === action.payload.id)) return state
-      // Adiciona o item com discount: 10 como valor padrão inicial
-      return { ...state, promotedItems: [...state.promotedItems, { ...action.payload, discount: 10 }] }
+      // Apenas o canal de "pontuais" (carousel) tem limite — eventos são ilimitados.
+      if (key === 'spotItems' && state[key].length >= MAX_PROMO_ITEMS) return state
+      if (state[key].find((p) => p.id === action.payload.id)) return state
+      return {
+        ...state,
+        [key]: [...state[key], { ...action.payload, discount: 10 }],
+      }
     }
     case 'REMOVE_ITEM':
       return {
         ...state,
-        promotedItems: state.promotedItems.filter((p) => p.id !== action.payload),
+        [key]: state[key].filter((p) => p.id !== action.payload),
       }
-    // Define o desconto de um item específico pelo ID
     case 'SET_ITEM_DISCOUNT':
       return {
         ...state,
-        promotedItems: state.promotedItems.map((p) =>
+        [key]: state[key].map((p) =>
           p.id === action.payload.id
             ? { ...p, discount: action.payload.discount }
             : p
         ),
       }
     case 'CLEAR':
-      return { ...state, promotedItems: [] }
+      return { ...state, [key]: [] }
     default:
       return state
   }
@@ -53,66 +72,102 @@ function promotionsReducer(state, action) {
 export function PromotionsProvider({ children }) {
   const [state, dispatch] = useReducer(promotionsReducer, initialState)
 
-  // Persiste automaticamente — cada item já carrega seu próprio discount
   useEffect(() => {
-    setItem(STORAGE_KEYS.PROMOTIONS, { items: state.promotedItems })
+    setItem(STORAGE_KEYS.PROMOTIONS, {
+      events: state.eventItems,
+      spots: state.spotItems,
+    })
   }, [state])
 
-  const isPromoted = useCallback(
-    (productId) => state.promotedItems.some((p) => p.id === productId),
-    [state.promotedItems]
+  // ─── Helpers que olham para ambas as listas ─────────────────────────────────
+
+  const isEventItem = useCallback(
+    (id) => state.eventItems.some((p) => p.id === id),
+    [state.eventItems]
   )
 
-  // Retorna o preço efetivo usando o desconto individual do próprio item
+  const isSpotItem = useCallback(
+    (id) => state.spotItems.some((p) => p.id === id),
+    [state.spotItems]
+  )
+
+  // Consumers legados (ProductCard, Watchlist, CartDrawer…) continuam perguntando
+  // apenas "este produto está promovido?" — retorna true se estiver em qualquer canal.
+  const isPromoted = useCallback(
+    (id) => isEventItem(id) || isSpotItem(id),
+    [isEventItem, isSpotItem]
+  )
+
+  // Prioriza o desconto do canal de evento (Black Friday) quando o item aparece em ambos.
+  const findPromoItem = useCallback(
+    (id) =>
+      state.eventItems.find((p) => p.id === id) ??
+      state.spotItems.find((p) => p.id === id) ??
+      null,
+    [state.eventItems, state.spotItems]
+  )
+
   const getEffectivePrice = useCallback(
     (product) => {
       if (!product) return 0
-      const promoItem = state.promotedItems.find((p) => p.id === product.id)
-      if (promoItem) {
-        return applyDiscount(product.price, promoItem.discount)
-      }
-      return product.price
+      const promo = findPromoItem(product.id)
+      return promo ? applyDiscount(product.price, promo.discount) : product.price
     },
-    [state.promotedItems]
+    [findPromoItem]
   )
 
-  const addPromoItem = useCallback((product) => {
-    dispatch({ type: 'ADD_ITEM', payload: product })
-  }, [])
-
-  const removePromoItem = useCallback((productId) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: productId })
-  }, [])
-
-  // Define o desconto de um item específico (substitui o antigo setDiscount global)
-  const setItemDiscount = useCallback((productId, value) => {
-    dispatch({ type: 'SET_ITEM_DISCOUNT', payload: { id: productId, discount: Number(value) } })
-  }, [])
-
-  // Retorna o discount atual de um item específico (usado nos inputs da página)
   const getItemDiscount = useCallback(
-    (productId) => {
-      const item = state.promotedItems.find((p) => p.id === productId)
-      return item ? item.discount : 10
-    },
-    [state.promotedItems]
+    (id) => findPromoItem(id)?.discount ?? 10,
+    [findPromoItem]
   )
 
-  const clearPromos = useCallback(() => {
-    dispatch({ type: 'CLEAR' })
-  }, [])
+  // ─── API por canal ──────────────────────────────────────────────────────────
+
+  const addEventItem       = useCallback((p)   => dispatch({ type: 'ADD_ITEM',          list: 'eventItems', payload: p }), [])
+  const removeEventItem    = useCallback((id)  => dispatch({ type: 'REMOVE_ITEM',       list: 'eventItems', payload: id }), [])
+  const setEventItemDiscount = useCallback((id, v) => dispatch({ type: 'SET_ITEM_DISCOUNT', list: 'eventItems', payload: { id, discount: Number(v) } }), [])
+  const clearEventItems    = useCallback(()    => dispatch({ type: 'CLEAR',             list: 'eventItems' }), [])
+  const getEventItemDiscount = useCallback(
+    (id) => state.eventItems.find((p) => p.id === id)?.discount ?? 10,
+    [state.eventItems]
+  )
+
+  const addSpotItem        = useCallback((p)   => dispatch({ type: 'ADD_ITEM',          list: 'spotItems', payload: p }), [])
+  const removeSpotItem     = useCallback((id)  => dispatch({ type: 'REMOVE_ITEM',       list: 'spotItems', payload: id }), [])
+  const setSpotItemDiscount = useCallback((id, v) => dispatch({ type: 'SET_ITEM_DISCOUNT', list: 'spotItems', payload: { id, discount: Number(v) } }), [])
+  const clearSpotItems     = useCallback(()    => dispatch({ type: 'CLEAR',             list: 'spotItems' }), [])
+  const getSpotItemDiscount = useCallback(
+    (id) => state.spotItems.find((p) => p.id === id)?.discount ?? 10,
+    [state.spotItems]
+  )
 
   return (
     <PromotionsContext.Provider
       value={{
-        promotedItems: state.promotedItems,
+        /* Estado dos dois canais */
+        eventItems: state.eventItems,
+        spotItems:  state.spotItems,
+
+        /* Helpers genéricos (uso consumidor) */
         isPromoted,
         getEffectivePrice,
         getItemDiscount,
-        addPromoItem,
-        removePromoItem,
-        setItemDiscount,
-        clearPromos,
+
+        /* API canal evento */
+        isEventItem,
+        addEventItem,
+        removeEventItem,
+        setEventItemDiscount,
+        clearEventItems,
+        getEventItemDiscount,
+
+        /* API canal pontual */
+        isSpotItem,
+        addSpotItem,
+        removeSpotItem,
+        setSpotItemDiscount,
+        clearSpotItems,
+        getSpotItemDiscount,
       }}
     >
       {children}

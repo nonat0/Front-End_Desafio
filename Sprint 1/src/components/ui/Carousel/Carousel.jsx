@@ -31,16 +31,16 @@ function getPromoBg(productId) {
 }
 
 export function Carousel() {
-  const { promotedItems } = usePromotionsContext()
+  const { spotItems } = usePromotionsContext()
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
 
-  const isPromo = promotedItems.length > 0
+  const isPromo = spotItems.length > 0
 
   /* Monta slides a partir dos produtos promovidos ou usa fallback */
   const slides = isPromo
-    ? promotedItems.map((p) => ({
+    ? spotItems.map((p) => ({
         id: p.id,
         title: p.title,
         discount: p.discount,

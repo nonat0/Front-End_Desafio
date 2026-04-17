@@ -1,7 +1,8 @@
-// Página Promotions — painel de gerenciamento de promoções.
-// Cada item selecionado tem seu próprio percentual de desconto (0–50%).
-// O botão "Confirmar" só ativa quando o valor muda.
-// Um modal de segunda confirmação exibe o preço antes/depois antes de aplicar.
+// Página Admin — painel de gerenciamento de promoções, dividido em dois canais:
+//   - Eventos           → alimenta o grid da página Black Friday
+//   - Promoções pontuais → alimenta o carousel da página inicial
+// A troca entre canais é feita por abas; o restante da UI (contador, descontos
+// individuais, filtros e grid) é compartilhado e parametrizado pelo canal ativo.
 
 import { useMemo, useState } from 'react'
 import { usePromotionsContext } from '@/context/PromotionsContext'
@@ -55,16 +56,11 @@ function PromoProductCard({ product, isSelected, onToggle, itemDiscount }) {
 }
 
 // ─── Linha de desconto individual por item ───────────────────────────────────
-// Exibida no painel abaixo do contador para cada produto selecionado.
-// Input: aceita apenas 1–50. Botão "Confirmar" ativa ao detectar mudança.
-// Ao confirmar abre modal de segunda confirmação com preço antes/depois.
 
 function ItemDiscountRow({ item, onConfirm }) {
   const [inputValue, setInputValue] = useState(item.discount)
   const [confirmOpen, setConfirmOpen] = useState(false)
 
-  // Mantém inputValue sincronizado se o desconto do item mudar externamente
-  // (ex: outro componente aplicou o desconto)
   const isDirty = Number(inputValue) !== item.discount
   const pendingDiscount = Number(inputValue)
   const isValid = !isNaN(pendingDiscount) && pendingDiscount >= 0 && pendingDiscount <= 50
@@ -72,7 +68,6 @@ function ItemDiscountRow({ item, onConfirm }) {
   const handleChange = (e) => {
     const raw = e.target.value
     if (raw === '') { setInputValue(''); return }
-    // Clamp entre 1 e 50
     const clamped = Math.min(50, Math.max(1, Number(raw)))
     setInputValue(clamped)
   }
@@ -87,20 +82,15 @@ function ItemDiscountRow({ item, onConfirm }) {
     setConfirmOpen(false)
   }
 
-  const handleCancel = () => {
-    setConfirmOpen(false)
-  }
+  const handleCancel = () => setConfirmOpen(false)
 
   return (
     <>
       <div className={styles.discountRow}>
-        {/* Miniatura do produto */}
         <img src={item.image} alt={item.title} className={styles.discountRowImg} />
 
-        {/* Nome truncado */}
         <span className={styles.discountRowTitle}>{truncateText(item.title, 40)}</span>
 
-        {/* Input com limite 1–50 — borda âmbar quando valor pendente */}
         <div className={`${styles.discountInputWrapper} ${isDirty ? styles.discountInputDirty : ''}`}>
           <input
             type="number"
@@ -114,7 +104,6 @@ function ItemDiscountRow({ item, onConfirm }) {
           <span className={styles.discountSymbol}>%</span>
         </div>
 
-        {/* Botão confirmar — desabilitado se valor não mudou ou for inválido */}
         <button
           className={styles.confirmBtn}
           onClick={handleConfirmClick}
@@ -123,18 +112,12 @@ function ItemDiscountRow({ item, onConfirm }) {
           Confirmar
         </button>
 
-        {/* Badge mostrando o desconto atualmente ativo */}
         {item.discount > 0 && (
           <span className={styles.activeDiscountBadge}>Ativo: -{item.discount}%</span>
         )}
       </div>
 
-      {/* Modal de segunda confirmação — mostra preço antes e depois */}
-      <Modal
-        isOpen={confirmOpen}
-        onClose={handleCancel}
-        title="Confirmar desconto"
-      >
+      <Modal isOpen={confirmOpen} onClose={handleCancel} title="Confirmar desconto">
         <div className={styles.modalContent}>
           <div className={styles.modalIcon}>🏷️</div>
           <p className={styles.modalText}>
@@ -164,37 +147,40 @@ function ItemDiscountRow({ item, onConfirm }) {
   )
 }
 
-// ─── Página principal ─────────────────────────────────────────────────────────
+// ─── Seção reutilizável (Eventos ou Pontuais) ────────────────────────────────
+// Recebe o canal como um feixe de callbacks/estado — toda a UI é idêntica.
 
-export function Promotions() {
-  const {
-    promotedItems,
-    isPromoted,
-    getItemDiscount,
-    addPromoItem,
-    removePromoItem,
-    setItemDiscount,
-    clearPromos,
-  } = usePromotionsContext()
-
-  const { products, categories, loading } = useProducts('all')
-
+function PromoSection({
+  description,
+  items,
+  isSelected,
+  getDiscount,
+  onAdd,
+  onRemove,
+  onSetDiscount,
+  onClear,
+  products,
+  categories,
+  loading,
+  maxItems,
+}) {
   const [searchInput, setSearchInput]       = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const debouncedSearch = useDebounce(searchInput, 300)
 
   const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const hasLimit = Number.isFinite(maxItems)
 
   const handleToggle = (product) => {
-    if (isPromoted(product.id)) {
-      removePromoItem(product.id)
-    } else {
-      if (promotedItems.length >= MAX_PROMO_ITEMS) {
-        setErrorModalOpen(true)
-        return
-      }
-      addPromoItem(product)
+    if (isSelected(product.id)) {
+      onRemove(product.id)
+      return
     }
+    if (hasLimit && items.length >= maxItems) {
+      setErrorModalOpen(true)
+      return
+    }
+    onAdd(product)
   }
 
   const filteredProducts = useMemo(() => {
@@ -210,113 +196,205 @@ export function Promotions() {
   }, [products, filterCategory, debouncedSearch])
 
   return (
+    <>
+      {/* Descrição + botão limpar */}
+      <div className={styles.sectionHeader}>
+        <p className={styles.pageDesc}>{description}</p>
+        {items.length > 0 && (
+          <button className={styles.clearBtn} onClick={onClear}>
+            Limpar seleção
+          </button>
+        )}
+      </div>
+
+      {/* Contador */}
+      <div className={styles.configPanel}>
+        <div className={styles.selectionInfo}>
+          {hasLimit && (
+            <div className={styles.selectionDots}>
+              {Array.from({ length: maxItems }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`${styles.selectionDot} ${i < items.length ? styles.selectionDotActive : ''}`}
+                />
+              ))}
+            </div>
+          )}
+          <span className={styles.selectionText}>
+            {hasLimit ? (
+              <><strong>{items.length}</strong> de {maxItems} produtos selecionados</>
+            ) : (
+              <><strong>{items.length}</strong> {items.length === 1 ? 'produto selecionado' : 'produtos selecionados'} <em className={styles.unlimitedHint}>· sem limite</em></>
+            )}
+          </span>
+        </div>
+      </div>
+
+      {/* Painel de descontos individuais */}
+      {items.length > 0 && (
+        <div className={styles.discountPanel}>
+          <h2 className={styles.discountPanelTitle}>Descontos individuais</h2>
+          {items.map((item) => (
+            <ItemDiscountRow key={item.id} item={item} onConfirm={onSetDiscount} />
+          ))}
+        </div>
+      )}
+
+      {/* Filtros */}
+      <div className={styles.filters}>
+        <input
+          type="search"
+          placeholder="Buscar produto por nome…"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          className={styles.searchInput}
+          aria-label="Buscar produto"
+        />
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className={styles.categorySelect}
+          aria-label="Filtrar por categoria"
+        >
+          <option value="all">Todas as categorias</option>
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>{capitalize(cat)}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Grid */}
+      {loading ? (
+        <div className={styles.loadingWrapper}><Spinner size="lg" /></div>
+      ) : filteredProducts.length === 0 ? (
+        <div className={styles.empty}><span>🔍</span><p>Nenhum produto encontrado.</p></div>
+      ) : (
+        <div className={styles.grid}>
+          {filteredProducts.map((product) => (
+            <PromoProductCard
+              key={product.id}
+              product={product}
+              isSelected={isSelected(product.id)}
+              onToggle={handleToggle}
+              itemDiscount={getDiscount(product.id)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Modal — limite de seleção atingido (só aparece quando há limite) */}
+      {hasLimit && (
+        <Modal isOpen={errorModalOpen} onClose={() => setErrorModalOpen(false)} title="Limite atingido">
+          <div className={styles.modalContent}>
+            <div className={styles.modalIcon}>⚠️</div>
+            <p className={styles.modalText}>
+              Você já selecionou o máximo de <strong>{maxItems} produtos</strong> nesta seção.
+            </p>
+            <p className={styles.modalHint}>Remova um produto antes de adicionar outro.</p>
+            <div className={styles.modalActions}>
+              <button className={styles.modalConfirmBtn} onClick={() => setErrorModalOpen(false)}>
+                Entendido
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </>
+  )
+}
+
+// ─── Página principal ─────────────────────────────────────────────────────────
+
+export function Promotions() {
+  const {
+    eventItems,
+    isEventItem,
+    getEventItemDiscount,
+    addEventItem,
+    removeEventItem,
+    setEventItemDiscount,
+    clearEventItems,
+
+    spotItems,
+    isSpotItem,
+    getSpotItemDiscount,
+    addSpotItem,
+    removeSpotItem,
+    setSpotItemDiscount,
+    clearSpotItems,
+  } = usePromotionsContext()
+
+  const { products, categories, loading } = useProducts('all')
+  const [activeTab, setActiveTab] = useState('events')
+
+  return (
     <main className={styles.main}>
       <div className="container">
 
         {/* Cabeçalho */}
         <div className={styles.pageHeader}>
           <div>
-            <h1 className={styles.pageTitle}>Promoções</h1>
+            <h1 className={styles.pageTitle}>Admin</h1>
             <p className={styles.pageDesc}>
-              Selecione até {MAX_PROMO_ITEMS} produtos e defina o desconto individual de cada um (0–50%).
+              Gerencie as promoções da loja em dois canais independentes.
             </p>
           </div>
-          {promotedItems.length > 0 && (
-            <button className={styles.clearBtn} onClick={clearPromos}>
-              Limpar seleção
-            </button>
-          )}
         </div>
 
-        {/* Contador de selecionados */}
-        <div className={styles.configPanel}>
-          <div className={styles.selectionInfo}>
-            <div className={styles.selectionDots}>
-              {Array.from({ length: MAX_PROMO_ITEMS }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`${styles.selectionDot} ${i < promotedItems.length ? styles.selectionDotActive : ''}`}
-                />
-              ))}
-            </div>
-            <span className={styles.selectionText}>
-              <strong>{promotedItems.length}</strong> de {MAX_PROMO_ITEMS} produtos selecionados
-            </span>
-          </div>
-        </div>
-
-        {/* Painel de descontos individuais — aparece ao selecionar pelo menos 1 item */}
-        {promotedItems.length > 0 && (
-          <div className={styles.discountPanel}>
-            <h2 className={styles.discountPanelTitle}>Descontos individuais</h2>
-            {promotedItems.map((item) => (
-              <ItemDiscountRow
-                key={item.id}
-                item={item}
-                onConfirm={setItemDiscount}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Filtros */}
-        <div className={styles.filters}>
-          <input
-            type="search"
-            placeholder="Buscar produto por nome…"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className={styles.searchInput}
-            aria-label="Buscar produto"
-          />
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className={styles.categorySelect}
-            aria-label="Filtrar por categoria"
+        {/* Abas de canais */}
+        <div className={styles.tabs} role="tablist">
+          <button
+            role="tab"
+            aria-selected={activeTab === 'events'}
+            className={`${styles.tab} ${activeTab === 'events' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('events')}
           >
-            <option value="all">Todas as categorias</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{capitalize(cat)}</option>
-            ))}
-          </select>
+            <span className={styles.tabLabel}>Eventos</span>
+            <span className={styles.tabCount}>{eventItems.length}</span>
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === 'spots'}
+            className={`${styles.tab} ${activeTab === 'spots' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('spots')}
+          >
+            <span className={styles.tabLabel}>Promoções pontuais</span>
+            <span className={styles.tabCount}>{spotItems.length}</span>
+          </button>
         </div>
 
-        {/* Grid de produtos */}
-        {loading ? (
-          <div className={styles.loadingWrapper}><Spinner size="lg" /></div>
-        ) : filteredProducts.length === 0 ? (
-          <div className={styles.empty}><span>🔍</span><p>Nenhum produto encontrado.</p></div>
+        {activeTab === 'events' ? (
+          <PromoSection
+            description="Selecione quantos produtos quiser para o grid da página Black Friday (desconto de 0–50% por item)."
+            items={eventItems}
+            isSelected={isEventItem}
+            getDiscount={getEventItemDiscount}
+            onAdd={addEventItem}
+            onRemove={removeEventItem}
+            onSetDiscount={setEventItemDiscount}
+            onClear={clearEventItems}
+            products={products}
+            categories={categories}
+            loading={loading}
+            maxItems={Infinity}
+          />
         ) : (
-          <div className={styles.grid}>
-            {filteredProducts.map((product) => (
-              <PromoProductCard
-                key={product.id}
-                product={product}
-                isSelected={isPromoted(product.id)}
-                onToggle={handleToggle}
-                itemDiscount={getItemDiscount(product.id)}
-              />
-            ))}
-          </div>
+          <PromoSection
+            description={`Selecione até ${MAX_PROMO_ITEMS} produtos para o carousel da página inicial (desconto de 0–50% por item).`}
+            items={spotItems}
+            isSelected={isSpotItem}
+            getDiscount={getSpotItemDiscount}
+            onAdd={addSpotItem}
+            onRemove={removeSpotItem}
+            onSetDiscount={setSpotItemDiscount}
+            onClear={clearSpotItems}
+            products={products}
+            categories={categories}
+            loading={loading}
+            maxItems={MAX_PROMO_ITEMS}
+          />
         )}
       </div>
-
-      {/* Modal — limite de seleção atingido */}
-      <Modal isOpen={errorModalOpen} onClose={() => setErrorModalOpen(false)} title="Limite atingido">
-        <div className={styles.modalContent}>
-          <div className={styles.modalIcon}>⚠️</div>
-          <p className={styles.modalText}>
-            Você já selecionou o máximo de <strong>{MAX_PROMO_ITEMS} produtos</strong> em promoção simultaneamente.
-          </p>
-          <p className={styles.modalHint}>Remova um produto antes de adicionar outro.</p>
-          <div className={styles.modalActions}>
-            <button className={styles.modalConfirmBtn} onClick={() => setErrorModalOpen(false)}>
-              Entendido
-            </button>
-          </div>
-        </div>
-      </Modal>
     </main>
   )
 }
