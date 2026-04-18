@@ -12,6 +12,28 @@ export const API_BASE_URL = 'https://fakestoreapi.com'
 /* Limite máximo de itens em promoção simultâneos */
 export const MAX_PROMO_ITEMS = 3
 
+/*
+  Faixa de desconto permitida nas promoções (valores em %).
+
+  DEFAULT_PROMO_DISCOUNT é o ponto inicial sugerido quando o admin
+  ainda não definiu nada para um item — evita "0% por descuido".
+  MAX_PROMO_DISCOUNT é o teto absoluto: além disso entra em terreno
+  de "promoção suspeita" e quebra a percepção de valor real.
+  Centralizar aqui evita números mágicos espalhados pela UI.
+ */
+export const DEFAULT_PROMO_DISCOUNT = 10
+export const MAX_PROMO_DISCOUNT = 50
+
+/*
+  Janela do toast de "Desfazer" após uma remoção do carrinho.
+
+  Mais longa que a duração padrão (TOAST_DURATION = 3s) porque o
+  usuário precisa de tempo para perceber o erro, mover o mouse até
+  o botão e clicar. 5s é um bom compromisso entre dar tempo
+  suficiente e não deixar o toast "preso" na tela.
+ */
+export const UNDO_TOAST_DURATION = 5000
+
 /* Chaves do localStorage — evita strings duplicadas pelo código */
 export const STORAGE_KEYS = {
   CART:       'desenvolve_cart',

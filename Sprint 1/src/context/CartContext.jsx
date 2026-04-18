@@ -2,29 +2,20 @@
   CartContext — gerenciamento do carrinho de compras.
   ────────────────────────────────────────────────────
 
+  Este arquivo contém apenas o que é específico de React: o Provider,
+  os hooks (`useReducer`, `useEffect`, `useMemo`, `useCallback`) e o
+  hook de consumo. Toda a lógica pura de transição de estado vive em
+  `./CartReducer.js` — separação que facilita teste unitário e
+  mantém o arquivo legível.
+
   Responsabilidades:
-    - Adicionar, remover e atualizar quantidade de itens.
-    - Calcular SUBTOTAL (sem desconto), TOTAL (com desconto) e
-      ECONOMIA em tempo real, consultando `getEffectivePrice` do
-      PromotionsContext para respeitar preços promocionais.
-    - Persistir estado no localStorage.
-    - SINCRONIZAR entre abas do navegador via evento `storage`
-      (quando o usuário tem o site aberto em duas abas, mexer em
-      uma reflete na outra).
-    - Expor `restoreItem` para o padrão "Desfazer" após remoção.
-
-  Notas de arquitetura:
-
-    - Usamos `useReducer` em vez de `useState` porque o estado do
-      carrinho tem transições bem definidas (ADD, REMOVE, RESTORE,
-      UPDATE_QUANTITY, REPLACE_ALL, CLEAR). Reducers puros são mais
-      fáceis de testar (entrada → saída sem side effects) e
-      permitem que a lógica fique EXPORTADA (ver export abaixo) para
-      ser consumida por testes unitários sem mockar o React.
-
-    - `useMemo` para `total`, `subtotal` e `savings` evita
-      recalcular em renders onde `items` não mudou — pequeno mas
-      cumulativo em listas grandes de itens.
+    - Inicializar o estado a partir do localStorage.
+    - Persistir mudanças no localStorage.
+    - SINCRONIZAR entre abas via evento `storage`.
+    - Calcular SUBTOTAL / TOTAL / ECONOMIA em tempo real, respeitando
+      preços promocionais via `getEffectivePrice`.
+    - Expor uma API conveniente (addToCart, removeFromCart, restoreItem
+      etc.) que esconde os detalhes do `dispatch`.
  */
 
 import {
@@ -39,111 +30,12 @@ import {
 import { STORAGE_KEYS } from '@/utils/constants'
 import { getItem, setItem } from '@/services/storage/localStorage'
 import { usePromotionsContext } from './PromotionsContext'
+import { cartReducer, makeCartKey, normalizeStoredItems } from './CartReducer'
 
 const CartContext = createContext(null)
 
-/**
- * Chave composta que identifica uma linha do carrinho.
- *
- * Produtos iguais com variantes diferentes (ex: tamanho P vs M)
- * viram linhas SEPARADAS no carrinho — unificá-los em uma única linha
- * esconderia do usuário qual variante ele pediu.
- */
-export function makeCartKey(id, size) {
-  return `${id}::${size ?? ''}`
-}
-
-/*
-  Reducer puro do carrinho.
-
-  EXPORTADO para poder ser testado unitariamente sem renderizar
-  nenhum componente — basta importar, chamar com (state, action)
-  e asserir o retorno. Também mantém o "princípio da pureza":
-  sem side effects (I/O, randomness, dispatch encadeado).
- */
-export function cartReducer(state, action) {
-  switch (action.type) {
-    case 'ADD_ITEM': {
-      const { product, size } = action.payload
-      const cartKey = makeCartKey(product.id, size)
-      const existing = state.find((i) => i.cartKey === cartKey)
-      if (existing) {
-        return state.map((i) =>
-          i.cartKey === cartKey ? { ...i, quantity: i.quantity + 1 } : i
-        )
-      }
-      return [...state, { ...product, size: size ?? null, cartKey, quantity: 1 }]
-    }
-
-    case 'REMOVE_ITEM':
-      return state.filter((i) => i.cartKey !== action.payload)
-
-    case 'RESTORE_ITEM': {
-      /*
-        Usado pelo Undo: insere um item já "pronto" (com quantity e
-        cartKey preservados) de volta no carrinho. Se já existir um
-        item com a mesma cartKey (improvável mas possível — usuário
-        adicionou de novo antes de desfazer), fundimos as quantidades
-        para não duplicar a linha.
-
-        `index` opcional tenta restaurar a posição original — mais
-        fiel à intenção do usuário do que sempre jogar no final.
-       */
-      const { item, index } = action.payload
-      const existing = state.find((i) => i.cartKey === item.cartKey)
-      if (existing) {
-        return state.map((i) =>
-          i.cartKey === item.cartKey
-            ? { ...i, quantity: i.quantity + item.quantity }
-            : i
-        )
-      }
-      if (typeof index === 'number' && index >= 0 && index <= state.length) {
-        const next = state.slice()
-        next.splice(index, 0, item)
-        return next
-      }
-      return [...state, item]
-    }
-
-    case 'UPDATE_QUANTITY':
-      return state.map((i) =>
-        i.cartKey === action.payload.cartKey
-          ? { ...i, quantity: Math.max(1, action.payload.quantity) }
-          : i
-      )
-
-    /*
-      REPLACE_ALL é usado pelo listener de `storage` (sync entre abas).
-      Em vez de dispatch um ADD por item da outra aba, substituímos
-      o estado de uma vez só — mais simples e consistente.
-     */
-    case 'REPLACE_ALL':
-      return action.payload
-
-    case 'CLEAR':
-      return []
-
-    default:
-      return state
-  }
-}
-
-/*
-  Normaliza itens lidos do localStorage.
-
-  Versões antigas do app salvavam itens sem `cartKey` (antes da
-  feature de tamanhos). Para não quebrar o carrinho de usuários
-  que já tinham dados persistidos, reconstruímos a chave quando
-  ela estiver ausente. É uma "migração silenciosa".
- */
-function normalizeStoredItems(raw) {
-  return raw.map((i) =>
-    i.cartKey
-      ? i
-      : { ...i, size: i.size ?? null, cartKey: makeCartKey(i.id, i.size ?? null) }
-  )
-}
+// Re-exportado por compatibilidade — alguns consumers podem importar daqui.
+export { makeCartKey }
 
 export function CartProvider({ children }) {
   const [items, dispatch] = useReducer(

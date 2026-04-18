@@ -2,125 +2,28 @@
   CartDrawer — painel deslizante do carrinho de compras.
   ──────────────────────────────────────────────────────
 
-  Exibe os itens com controle de quantidade, preço efetivo (com
-  eventuais descontos) e um resumo financeiro separado em
-  SUBTOTAL / ECONOMIA / TOTAL.
+  Cuida apenas da MOLDURA do carrinho:
+    - Header com título e botão fechar.
+    - Lista de itens (delegando cada linha ao componente CartItem).
+    - Footer com breakdown SUBTOTAL / ECONOMIA / TOTAL e ações.
+    - Modal de confirmação para "Limpar carrinho".
+
+  A lógica de cada item (quantidade, remoção com undo, preço efetivo)
+  vive em CartItem.jsx — separação que facilita reuso e teste.
 
   Padrões de UX implementados:
-
     - ESC ou clique no overlay fecham o drawer.
-    - Remover um item exibe um toast "Desfazer" que permite
-      restaurar o item na mesma posição — padrão comum em apps
-      modernos para compensar cliques acidentais sem precisar
-      de um diálogo de confirmação a cada remoção.
-    - "Limpar carrinho" abre um Modal de confirmação antes de
-      apagar tudo — ação irreversível e potencialmente destrutiva
-      merece uma segunda chance explícita.
-
-  Expansível para incluir cupons, resumo de frete e checkout.
+    - Ações destrutivas e irreversíveis (limpar) passam por Modal.
+    - Scroll do body é bloqueado enquanto o drawer está aberto,
+      evitando "double scroll" desconfortável.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCartContext } from '@/context/CartContext'
-import { usePromotionsContext } from '@/context/PromotionsContext'
-import { useToastContext } from '@/context/ToastContext'
 import { Modal } from '@/components/ui/Modal/Modal'
-import { formatPrice, truncateText } from '@/utils/formatters'
+import { formatPrice } from '@/utils/formatters'
+import { CartItem } from './CartItem'
 import styles from './CartDrawer.module.css'
-
-/*
-  Hook auxiliar — mantém uma ref sempre apontando para o valor
-  mais recente do parâmetro. Útil em callbacks assíncronos (como
-  o `onClick` do toast, que executa muito depois de criado) para
-  evitar "stale closures" — situação em que o callback captura
-  uma versão VELHA de uma função/valor e age em dados desatualizados.
- */
-function useLatestRef(value) {
-  const ref = useRef(value)
-  ref.current = value
-  return ref
-}
-
-function CartItem({ item }) {
-  const { removeFromCart, restoreItem, updateQuantity } = useCartContext()
-  const { getEffectivePrice, isPromoted } = usePromotionsContext()
-  const { showToast } = useToastContext()
-
-  const effectivePrice = getEffectivePrice(item)
-  const promoted = isPromoted(item.id)
-
-  // Ref para evitar closure estagnada ao usar `restoreItem` dentro
-  // do callback do toast (que pode disparar segundos depois).
-  const restoreRef = useLatestRef(restoreItem)
-
-  /*
-    Remove o item + oferece desfazer.
-
-    `removeFromCart` devolve `{ item, index }` com os dados
-    necessários para restauração. Passamos isso direto para o
-    `restoreItem` no handler do toast — se o usuário clicar em
-    "Desfazer", a linha volta intacta (mesma quantidade, mesma
-    posição). Janela de 5s é longa o suficiente para detectar o
-    erro mas curta o suficiente para não atrapalhar.
-   */
-  const handleRemove = () => {
-    const snapshot = removeFromCart(item.cartKey)
-    if (!snapshot) return
-
-    showToast({
-      message: `${truncateText(snapshot.item.title, 30)} removido do carrinho`,
-      type: 'info',
-      duration: 5000,
-      action: {
-        label: 'Desfazer',
-        onClick: () => restoreRef.current?.(snapshot),
-      },
-    })
-  }
-
-  return (
-    <div className={styles.item}>
-      <div className={styles.itemImage}>
-        <img src={item.image} alt={item.title} />
-      </div>
-      <div className={styles.itemInfo}>
-        <p className={styles.itemTitle}>{truncateText(item.title, 40)}</p>
-        {item.size && <span className={styles.itemSize}>{item.size}</span>}
-        <div className={styles.itemPriceRow}>
-          {promoted && (
-            <span className={styles.itemOriginalPrice}>{formatPrice(item.price)}</span>
-          )}
-          <span className={`${styles.itemPrice} ${promoted ? styles.itemPromoPrice : ''}`}>
-            {formatPrice(effectivePrice)}
-          </span>
-        </div>
-        <div className={styles.itemControls}>
-          <button
-            className={styles.qtyBtn}
-            onClick={() => updateQuantity(item.cartKey, item.quantity - 1)}
-            disabled={item.quantity <= 1}
-            aria-label="Diminuir quantidade"
-          >−</button>
-          <span className={styles.qty}>{item.quantity}</span>
-          <button
-            className={styles.qtyBtn}
-            onClick={() => updateQuantity(item.cartKey, item.quantity + 1)}
-            aria-label="Aumentar quantidade"
-          >+</button>
-        </div>
-      </div>
-      <button
-        className={styles.removeBtn}
-        onClick={handleRemove}
-        aria-label="Remover item"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          <path d="M18 6 6 18M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-  )
-}
 
 export function CartDrawer({ isOpen, onClose }) {
   const { items, subtotal, savings, total, clearCart } = useCartContext()
@@ -188,8 +91,7 @@ export function CartDrawer({ isOpen, onClose }) {
                 total    → o que ele REALMENTE vai pagar
 
               Exibir "economia" destacada reforça o valor percebido
-              das promoções — padrão comum em e-commerce para
-              converter a percepção de desconto em satisfação.
+              das promoções — padrão comum em e-commerce.
             */}
             <div className={styles.footer}>
               <div className={styles.summary}>
@@ -226,10 +128,7 @@ export function CartDrawer({ isOpen, onClose }) {
 
       {/*
         Modal de confirmação para clearCart.
-
-        Renderizado FORA do drawer para não herdar o transform
-        deslizante. Como o Modal é `position: fixed`, fica
-        corretamente sobreposto a tudo — inclusive ao drawer.
+        Renderizado fora do drawer para não herdar o transform deslizante.
       */}
       <Modal
         isOpen={confirmClearOpen}
