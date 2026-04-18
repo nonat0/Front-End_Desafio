@@ -49,6 +49,26 @@
 }
 .close:hover { opacity: 1; }
 
+/*
+ * Botão de ação do toast (ex: "Desfazer").
+ * Herda `currentColor` da variante — fica verde em success, vermelho
+ * em error etc. — mantendo o visual coeso com o tipo do toast.
+ */
+.action {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  color: currentColor;
+  background: transparent;
+  border: 1px solid currentColor;
+  transition: background var(--transition-fast);
+}
+.action:hover { background: rgba(0, 0, 0, 0.08); }
+
 /* --- Variantes --- */
 .success {
   background: var(--color-success-light);

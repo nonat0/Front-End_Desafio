@@ -1,6 +1,16 @@
-// Toast — notificação visual temporária.
-// Tipos: success (verde), error (vermelho), warning (âmbar), info (neutro).
-// Renderizado pelo ToastContainer que é montado uma única vez no AppLayout.
+/*
+  Toast — notificação visual temporária.
+  ───────────────────────────────────────
+
+  Tipos: success (verde), error (vermelho), warning (âmbar), info (neutro).
+  Renderizado pelo ToastContainer que é montado uma única vez no AppLayout.
+
+  Suporta uma AÇÃO opcional (ex: "Desfazer" após remover item do carrinho).
+  Quando presente, a ação aparece como um botão antes do ícone de fechar.
+  Clicar na ação executa o handler fornecido E remove o toast — a remoção
+  explícita evita que o timeout do toast dispare depois e tente remover
+  um toast já removido.
+ */
 
 import styles from './Toast.module.css'
 
@@ -28,10 +38,33 @@ const ICONS = {
 }
 
 export function Toast({ toast, onRemove }) {
+  /*
+    Handler para a ação (ex: Desfazer). Primeiro executa o callback
+    do consumidor, depois remove o toast da tela — nessa ordem para
+    garantir que, se a ação tiver side effects síncronos, o toast
+    continue visível até o final da execução.
+   */
+  const handleActionClick = () => {
+    toast.action?.onClick?.()
+    onRemove(toast.id)
+  }
+
   return (
     <div className={`${styles.toast} ${styles[toast.type]}`} role="alert">
       <span className={styles.icon}>{ICONS[toast.type]}</span>
       <p className={styles.message}>{toast.message}</p>
+
+      {/* Botão de ação opcional — renderizado apenas se o toast foi criado com `action` */}
+      {toast.action && (
+        <button
+          type="button"
+          className={styles.action}
+          onClick={handleActionClick}
+        >
+          {toast.action.label}
+        </button>
+      )}
+
       <button
         className={styles.close}
         onClick={() => onRemove(toast.id)}

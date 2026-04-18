@@ -218,6 +218,41 @@
   flex-shrink: 0;
 }
 
+/*
+  Summary (subtotal + economia).
+
+  Visualmente SEPARADO do total por um divisor sutil — sinaliza
+  que esses são "detalhes" intermediários, enquanto o total é o
+  valor que o usuário realmente pagará.
+ */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px dashed var(--color-border);
+}
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.summaryLabel {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+.summaryValue {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+/* Economia destacada — cor promo para reforçar valor percebido. */
+.summarySavings .summaryLabel,
+.summarySavings .summaryValue {
+  color: var(--color-promo);
+  font-weight: 700;
+}
+
 .totalRow {
   display: flex;
   align-items: center;
@@ -256,3 +291,38 @@
   transition: color var(--transition-fast);
 }
 .clearBtn:hover { color: var(--color-error); }
+
+/*
+  Estilos do Modal de confirmação de "Limpar carrinho".
+  Vivem aqui (e não no CSS global do Modal) porque são específicos
+  desta ação — mantém o componente Modal genérico e reutilizável.
+ */
+.confirmText {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  line-height: 1.5;
+  margin-bottom: var(--space-5);
+}
+.confirmActions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+.confirmCancel,
+.confirmDanger {
+  padding: var(--space-3) var(--space-5);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+.confirmCancel {
+  background: var(--color-bg-2);
+  color: var(--color-text);
+}
+.confirmCancel:hover { background: var(--color-border); }
+.confirmDanger {
+  background: var(--color-error);
+  color: #fff;
+}
+.confirmDanger:hover { background: var(--color-error-dark, var(--color-error)); filter: brightness(0.95); }
