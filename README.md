@@ -14,7 +14,7 @@ npm install
 npm run dev
 
 # 3. Acessar no navegador
-http://localhost:5173
+http://localhost:xxxx
 ```
 
 Para build de produção: `npm run build` (saída em `dist/`).
