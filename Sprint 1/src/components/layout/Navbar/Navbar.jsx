@@ -57,10 +57,6 @@ export function Navbar() {
             <NavLink to="/" end className={({ isActive }) => `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}>
               Loja
             </NavLink>
-            <NavLink to="/watchlist" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}>
-              Watchlist
-              {watchCount > 0 && <span className={styles.badge}>{watchCount}</span>}
-            </NavLink>
             <NavLink to="/black-friday" className={({ isActive }) => `${styles.navLink} ${styles.navLinkBf} ${isActive ? styles.navLinkActive : ''}`}>
               Black Friday
             </NavLink>
@@ -110,6 +106,21 @@ export function Navbar() {
                 </svg>
               )}
             </button>
+
+            {/* Watchlist — mesmo ícone do botão de adicionar no ProductCard */}
+            <NavLink
+              to="/watchlist"
+              className={({ isActive }) => `${styles.iconBtn} ${isActive ? styles.iconBtnActive : ''}`}
+              aria-label={`Watchlist — ${watchCount} itens`}
+              title="Watchlist"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+              {watchCount > 0 && (
+                <span className={styles.cartBadge}>{watchCount > 99 ? '99+' : watchCount}</span>
+              )}
+            </NavLink>
 
             {/* Carrinho */}
             <button

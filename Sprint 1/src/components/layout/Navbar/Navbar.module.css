@@ -88,6 +88,7 @@
   position: relative;
   flex: 1;
   max-width: 340px;
+  margin-left: 7rem;
 }
 
 .searchForm {
@@ -150,6 +151,10 @@
 .iconBtn:hover {
   color: #fff;
   background: rgba(255,255,255,0.12);
+}
+.iconBtnActive {
+  color: #fff;
+  background: rgba(255,255,255,0.15);
 }
 
 .cartBadge {
