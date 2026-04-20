@@ -42,6 +42,7 @@ src/
 ├── router/           # React Router v6 + lazy() + Suspense + ErrorBoundary
 ├── services/
 │   ├── api/          # client Axios (retry/backoff), products
+│   ├── i18n/         # tradução EN → PT-BR (MyMemory + cache)
 │   └── storage/      # wrapper de localStorage
 ├── styles/           # Variáveis CSS, globals, dark mode
 └── utils/            # Formatters, constants, cache (TTL)
@@ -74,6 +75,13 @@ import { Modal, Spinner, ErrorBoundary } from '@/components/ui'
 - **Cancelamento via `AbortController`** — propagado em todos os
   serviços (`getProducts({ signal })`, etc), elimina race conditions
   quando o usuário troca de filtro/página antes da resposta chegar.
+- **Camada de i18n** (`services/i18n/`) — traduz títulos, descrições
+  e categorias dos produtos EN → PT-BR via [MyMemory API](https://mymemory.translated.net/doc/spec.php)
+  antes de devolver ao resto do app. Cache persistente em
+  `localStorage` (primeira visita traduz tudo; as seguintes são
+  instantâneas), concorrência controlada e fallback para o texto
+  original em caso de falha/rate-limit — tradução é best-effort e
+  nunca bloqueia a UI.
 
 ### Carrinho
 
@@ -186,6 +194,7 @@ import { Modal, Spinner, ErrorBoundary } from '@/components/ui'
 | CSS Modules | Estilização com escopo isolado |
 | localStorage + storage event | Persistência e sync entre abas |
 | Fake Store API | Dados de produtos |
+| MyMemory API | Tradução EN → PT-BR do catálogo |
 
 **Fontes:** Syne (display) + DM Sans (corpo)
 
@@ -211,5 +220,6 @@ import { Modal, Spinner, ErrorBoundary } from '@/components/ui'
 - Code splitting por rota
 - Retry automático com backoff exponencial nas chamadas da API
 - ErrorBoundary global com fallback amigável
+- Tradução automática do catálogo EN → PT-BR (MyMemory + cache em `localStorage`)
 
 ---

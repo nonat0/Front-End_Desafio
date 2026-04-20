@@ -28,7 +28,7 @@ export function Home() {
     let list = [...products]
 
     if (activeCategory !== 'all') {
-      list = list.filter((p) => p.category === activeCategory)
+      list = list.filter((p) => p.categorySlug === activeCategory)
     }
 
     // Filtra pelo termo debounced — quando vazio exibe tudo

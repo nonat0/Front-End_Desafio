@@ -2,8 +2,12 @@
 // Categoria exibida como botões pill lado a lado.
 // Ordenação como select à direita.
 // Layout em faixa única para que o grid ocupe 100% da largura abaixo.
+//
+// Categorias chegam como objetos `{ slug, label }` vindos do service de
+// produtos. O slug é usado para filtrar o catálogo (combina com o valor
+// devolvido pela Fake Store API em produtos); o label é o rótulo
+// traduzido para exibição.
 
-import { capitalize } from '@/utils/formatters'
 import styles from './ProductFilter.module.css'
 
 export function ProductFilter({ categories, activeCategory, onCategoryChange, sortBy, onSortChange }) {
@@ -17,13 +21,13 @@ export function ProductFilter({ categories, activeCategory, onCategoryChange, so
         >
           Todos
         </button>
-        {categories.map((cat) => (
+        {categories.map(({ slug, label }) => (
           <button
-            key={cat}
-            className={`${styles.pill} ${activeCategory === cat ? styles.pillActive : ''}`}
-            onClick={() => onCategoryChange(cat)}
+            key={slug}
+            className={`${styles.pill} ${activeCategory === slug ? styles.pillActive : ''}`}
+            onClick={() => onCategoryChange(slug)}
           >
-            {capitalize(cat)}
+            {label}
           </button>
         ))}
       </div>

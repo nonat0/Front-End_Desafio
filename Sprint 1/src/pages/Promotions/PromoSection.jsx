@@ -1,6 +1,5 @@
 /*
   PromoSection — bloco reutilizável que renderiza UM canal de promoção.
-  ────────────────────────────────────────────────────────────────────
 
   O painel admin tem dois canais (Eventos e Pontuais) com a MESMA UI
   mas dados/handlers diferentes (cada canal vive em um pedaço próprio
@@ -27,7 +26,6 @@ import { useMemo, useState } from 'react'
 import { useDebounce } from '@/hooks/useDebounce'
 import { Modal } from '@/components/ui/Modal/Modal'
 import { Spinner } from '@/components/ui/Spinner/Spinner'
-import { capitalize } from '@/utils/formatters'
 import { PromoProductCard } from './PromoProductCard'
 import { ItemDiscountRow } from './ItemDiscountRow'
 import styles from './Promotions.module.css'
@@ -68,7 +66,7 @@ export function PromoSection({
   const filteredProducts = useMemo(() => {
     let list = [...products]
     if (filterCategory !== 'all') {
-      list = list.filter((p) => p.category === filterCategory)
+      list = list.filter((p) => p.categorySlug === filterCategory)
     }
     if (debouncedSearch) {
       const q = debouncedSearch.toLowerCase()
@@ -139,8 +137,8 @@ export function PromoSection({
           aria-label="Filtrar por categoria"
         >
           <option value="all">Todas as categorias</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>{capitalize(cat)}</option>
+          {categories.map(({ slug, label }) => (
+            <option key={slug} value={slug}>{label}</option>
           ))}
         </select>
       </div>

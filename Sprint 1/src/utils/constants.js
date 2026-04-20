@@ -36,10 +36,11 @@ export const UNDO_TOAST_DURATION = 5000
 
 /* Chaves do localStorage — evita strings duplicadas pelo código */
 export const STORAGE_KEYS = {
-  CART:       'desenvolve_cart',
-  WATCHLIST:  'desenvolve_watchlist',
-  PROMOTIONS: 'desenvolve_promotions',
-  THEME:      'desenvolve_theme',
+  CART:         'desenvolve_cart',
+  WATCHLIST:    'desenvolve_watchlist',
+  PROMOTIONS:   'desenvolve_promotions',
+  THEME:        'desenvolve_theme',
+  TRANSLATIONS: 'desenvolve_translations_en_ptbr',
 }
 
 /* Duração padrão dos toasts em milissegundos */
@@ -75,6 +76,20 @@ export const API_RETRY = {
   MAX_ATTEMPTS: 2,
   BASE_DELAY_MS: 500,
   MAX_DELAY_MS: 4000,
+}
+
+/*
+  Configuração da API pública de tradução (MyMemory).
+ */
+export const TRANSLATE_API = {
+  BASE_URL: 'https://api.mymemory.translated.net/get',
+  LANG_PAIR: 'en|pt-BR',
+  /* Concorrência máxima ao traduzir vários textos em paralelo.
+     Valores altos disparam rate-limit; valores baixos deixam a UX lenta. */
+  CONCURRENCY: 5,
+  /* Timeout específico — a API é mais lenta que a Fake Store, mas não
+     pode segurar a tela indefinidamente se cair. */
+  TIMEOUT_MS: 6000,
 }
 
 /* Fallback para o carousel quando não há promoções ativas */

@@ -1,16 +1,13 @@
 /*
   Promotions — página /admin do painel de promoções.
-  ───────────────────────────────────────────────────
 
   Esta página é puramente "orquestradora": ela apenas escolhe entre
   dois CANAIS de promoção (Eventos e Pontuais) e injeta no PromoSection
   os handlers/estado correspondentes do PromotionsContext.
 
-    - Eventos          → alimenta o grid da página /black-friday
-                         (sem limite — o admin escolhe quantos quiser).
-    - Promoções pontuais → alimenta o carousel da Home
-                         (limitado a MAX_PROMO_ITEMS para não diluir
-                          o destaque visual de cada slide).
+  - Eventos alimenta o grid da página black-friday(sem limite — o admin escolhe quantos quiser).
+
+  - Promoções pontuais  alimenta o carousel da Home (limitado a MAX_PROMO_ITEMS para não diluir o destaque visual de cada slide).
 
   Toda a UI (contador, descontos individuais, filtros, grid e modais)
   vive em PromoSection — ver `./PromoSection.jsx`. Cada sub-componente
