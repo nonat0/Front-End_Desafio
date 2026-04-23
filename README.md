@@ -220,6 +220,6 @@ import { Modal, Spinner, ErrorBoundary } from '@/components/ui'
 - Code splitting por rota
 - Retry automático com backoff exponencial nas chamadas da API
 - ErrorBoundary global com fallback amigável
-- Tradução automática do catálogo EN → PT-BR (MyMemory + cache em `localStorage`)
+- API de tradução automática do catálogo EN → PT-BR (MyMemory+ cache em `localStorage`)
 
 ---
